@@ -45,11 +45,7 @@ func (s *CephImageSource) Matches(r *http.Request) bool {
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	co := parseObj(req)
-	buf, err := s.fetchObject(co)
-	if err != nil {
-		return nil, err
-	}
-	return buf, nil
+	return s.fetchObject(co)
 }
 
 func parseObj(req *http.Request) CephObject {
