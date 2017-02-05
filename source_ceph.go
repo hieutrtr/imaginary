@@ -34,7 +34,7 @@ func MakeConnection() *rados.Conn {
 	conn.ReadConfigFile("/etc/ceph/ceph.conf")
 	err = conn.Connect()
 	if err != nil {
-		panic(err)
+		exitWithError("rados connection fail: %s", err)
 	}
 	return conn
 }
