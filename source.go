@@ -15,6 +15,8 @@ type SourceConfig struct {
 	Type            ImageSourceType
 	AllowedOrigings []*url.URL
 	MaxAllowedSize  int
+	EnableCeph      bool
+	CephConfig      string
 }
 
 var imageSourceMap = make(map[ImageSourceType]ImageSource)
@@ -38,6 +40,8 @@ func LoadSources(o ServerOptions) {
 			Authorization:   o.Authorization,
 			AllowedOrigings: o.AlloweOrigins,
 			MaxAllowedSize:  o.MaxAllowedSize,
+			EnableCeph:      o.EnableCeph,
+			CephConfig:      o.CephConfig,
 		})
 	}
 }

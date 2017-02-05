@@ -21,8 +21,10 @@ type CephImageSource struct {
 
 func NewCephImageSource(config *SourceConfig) ImageSource {
 	CISource := &CephImageSource{}
-	CISource.Config = config
-	CISource.Connection = MakeConnection()
+	if config.EnableCeph {
+		CISource.Config = config
+		CISource.Connection = MakeConnection()
+	}
 	return CISource
 }
 
@@ -40,7 +42,7 @@ func MakeConnection() *rados.Conn {
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
-	return r.Method == "GET" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
+	return r.Method == "GET" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != "" && s.Config.EnableCeph
 }
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {

@@ -47,6 +47,8 @@ var (
 	aBurst             = flag.Int("burst", 100, "Throttle burst max cache size")
 	aMRelease          = flag.Int("mrelease", 30, "OS memory release interval in seconds")
 	aCpus              = flag.Int("cpus", runtime.GOMAXPROCS(-1), "Number of cpu cores to use")
+	aEnableCeph        = flag.Bool("enable-ceph", false, "enable ceph integration")
+	aCephConf          = flag.String("ceph-conf", "/etc/ceph/ceph.conf", "path to ceph config")
 )
 
 const usage = `imaginary %s
@@ -62,6 +64,7 @@ Usage:
   imaginary -enable-url-source -authorization "Basic AwDJdL2DbwrD=="
 	imaginary -enable-placeholder
 	imaginery -enable-url-source -placeholder ./placeholder.jpg
+	imaginary -enable-ceph -ceph-config /etc/ceph/ceph.conf
 	imaginary -h | -help
   imaginary -v | -version
 
@@ -92,6 +95,8 @@ Options:
   -mrelease <num>           OS memory release interval in seconds [default: 30]
   -cpus <num>               Number of used cpu cores.
                             (default for current machine is %d cores)
+	-enable-ceph              enable ceph integration
+	-ceph-config              path to ceph config
 `
 
 func main() {
@@ -133,6 +138,8 @@ func main() {
 		Authorization:     *aAuthorization,
 		AlloweOrigins:     parseOrigins(*aAlloweOrigins),
 		MaxAllowedSize:    *aMaxAllowedSize,
+		EnableCeph:        *aEnableCeph,
+		CephConfig:        *aCephConf,
 	}
 
 	// Create a memory release goroutine

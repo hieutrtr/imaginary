@@ -32,6 +32,8 @@ type ServerOptions struct {
 	PlaceholderImage  []byte
 	AlloweOrigins     []*url.URL
 	MaxAllowedSize    int
+	EnableCeph        bool
+	CephConfig        string
 }
 
 func Server(o ServerOptions) error {
