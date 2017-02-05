@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/noahdesu/go-ceph/rados"
@@ -21,19 +22,19 @@ type CephImageSource struct {
 
 func NewCephImageSource(config *SourceConfig) ImageSource {
 	CISource := &CephImageSource{}
+	CISource.Config = config
 	if config.EnableCeph {
-		CISource.Config = config
-		CISource.Connection = MakeConnection()
+		CISource.Connection = MakeConnection(config)
 	}
 	return CISource
 }
 
-func MakeConnection() *rados.Conn {
+func MakeConnection(config *SourceConfig) *rados.Conn {
 	conn, err := rados.NewConn()
 	if err != nil {
 		panic(err)
 	}
-	conn.ReadConfigFile("/etc/ceph/ceph.conf")
+	conn.ReadConfigFile(config.CephConfig)
 	err = conn.Connect()
 	if err != nil {
 		exitWithError("rados connection fail: %s", err)
@@ -42,7 +43,7 @@ func MakeConnection() *rados.Conn {
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
-	return r.Method == "GET" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != "" && s.Config.EnableCeph
+	return r.Method == "GET" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
 }
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
@@ -57,6 +58,9 @@ func parseObj(req *http.Request) CephObject {
 }
 
 func (s *CephImageSource) fetchObject(co CephObject) ([]byte, error) {
+	if s.Config.EnableCeph == false {
+		return nil, fmt.Errorf("Ceph is not enable")
+	}
 	ioctx, err := s.Connection.OpenIOContext(PoolName)
 	defer ioctx.Destroy()
 	if err != nil {
