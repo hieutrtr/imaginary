@@ -32,7 +32,7 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 func MakeConnection(config *SourceConfig) *rados.Conn {
 	conn, err := rados.NewConn()
 	if err != nil {
-		panic(err)
+		exitWithError("rados connection fail: %s", err)
 	}
 	conn.ReadConfigFile(config.CephConfig)
 	err = conn.Connect()
