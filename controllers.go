@@ -51,6 +51,41 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 	}
 }
 
+func cephController(o ServerOptions, operation Operation) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var imageSource = MatchSource(req)
+		if imageSource == nil {
+			ErrorReply(req, w, ErrMissingImageSource, o)
+			return
+		}
+
+		buf, err := imageSource.GetImage(req)
+		if err != nil {
+			ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+			return
+		}
+
+		if len(buf) == 0 {
+			ErrorReply(req, w, ErrEmptyBody, o)
+			return
+		}
+
+		var connection = MatchConnection(req)
+		if connection == nil {
+			ErrorReply(req, w, ErrMissingConnection, o)
+			return
+		}
+
+		err = connection.Execute(req, buf)
+		if err != nil {
+			ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+			return
+		}
+
+		imageHandler(w, req, buf, operation, o)
+	}
+}
+
 func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) {
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
@@ -112,6 +147,7 @@ func formController(w http.ResponseWriter, r *http.Request) {
 		{"Add watermark", "watermark", "textwidth=100&text=Hello&font=sans%2012&opacity=0.5&color=255,200,50"},
 		{"Convert format", "convert", "type=png"},
 		{"Image metadata", "info", ""},
+		{"Upload Image", "upload", "cns=ads&cid=1269"},
 	}
 
 	html := "<html><body>"
