@@ -17,7 +17,7 @@ type CephConnection struct {
 func NewCephConnection(config *ConnectionConfig) Connection {
 	cephConn := &CephConnection{}
 	cephConn.Config = config
-	if config.EnableCeph == false {
+	if config.EnableCeph {
 		cephConn.Conn = MakeCephConnection(config)
 	}
 	return cephConn
