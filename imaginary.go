@@ -179,6 +179,7 @@ func main() {
 
 	// Load image source providers
 	LoadSources(opts)
+	LoadConnections(opts)
 
 	// Start the server
 	err := Server(opts)
