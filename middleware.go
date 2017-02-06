@@ -41,6 +41,12 @@ func ImageMiddleware(o ServerOptions) func(Operation) http.Handler {
 	}
 }
 
+func CephMiddleware(o ServerOptions) func(Operation) http.Handler {
+	return func(fn Operation) http.Handler {
+		return validateImage(Middleware(cephController(o, Operation(fn)), o), o)
+	}
+}
+
 func throttleError(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "throttle error: "+err.Error(), http.StatusInternalServerError)
