@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/noahdesu/go-ceph/rados"
@@ -16,7 +17,9 @@ type CephConnection struct {
 func NewCephConnection(config *ConnectionConfig) Connection {
 	cephConn := &CephConnection{}
 	cephConn.Config = config
-	cephConn.Conn = MakeCephConnection(config)
+	if config.EnableCeph == false {
+		cephConn.Conn = MakeCephConnection(config)
+	}
 	return cephConn
 }
 
@@ -38,6 +41,9 @@ func (c *CephConnection) Matches(r *http.Request) bool {
 }
 
 func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
+	if c.Config.EnableCeph == false {
+		return fmt.Errorf("Ceph is not enable")
+	}
 	ioctx, err := c.Conn.OpenIOContext(c.Config.PoolName)
 	defer ioctx.Destroy()
 	if err != nil {
