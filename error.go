@@ -30,6 +30,7 @@ var (
 	ErrInvalidFilePath    = NewError("Invalid file path", BadRequest)
 	ErrInvalidImageURL    = NewError("Invalid image URL", BadRequest)
 	ErrMissingImageSource = NewError("Cannot process the image due to missing or invalid params", BadRequest)
+	ErrMissingConnection  = NewError("Cannot process the image due to missing or invalid params", BadRequest)
 )
 
 type Error struct {
