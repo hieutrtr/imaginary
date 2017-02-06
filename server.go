@@ -84,5 +84,7 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(join(o, "/watermark"), image(Watermark))
 	mux.Handle(join(o, "/info"), image(Info))
 
+	ceph := CephMiddleware(o)
+	mux.Handle(join(o, "/upload"), ceph(Info))
 	return mux
 }
