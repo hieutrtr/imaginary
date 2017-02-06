@@ -16,7 +16,7 @@ var connectionFactoryMap = make(map[ConnectionType]ConnectionFactoryFunction)
 
 type Connection interface {
 	Matches(*http.Request) bool
-	Execute(*http.Request) error
+	Execute(*http.Request, []byte) error
 }
 
 func RegisterConnection(connType ConnectionType, factory ConnectionFactoryFunction) {
