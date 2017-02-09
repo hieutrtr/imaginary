@@ -37,7 +37,7 @@ func MakeCephConnection(config *ConnectionConfig) *rados.Conn {
 }
 
 func (c *CephConnection) Matches(r *http.Request) bool {
-	return r.Method == "POST" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
+	return r.Method == "POST" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != "" && r.URL.Query().Get("cattr") != ""
 }
 
 func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
@@ -49,7 +49,7 @@ func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 	if err != nil {
 		return err
 	}
-	err = ioctx.SetXattr(r.URL.Query().Get("cns"), r.URL.Query().Get("cid"), buf)
+	err = ioctx.SetXattr(r.URL.Query().Get("coid"), r.URL.Query().Get("cattr"), buf)
 	if err != nil {
 		return err
 	}

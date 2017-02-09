@@ -10,9 +10,9 @@ import (
 const ImageSourceTypeCeph ImageSourceType = "ceph"
 
 type CephObject struct {
-	NameSpace string
-	OID       string
 	Pool      string
+	OID       string
+	Attribute string
 }
 
 type CephImageSource struct {
@@ -43,19 +43,19 @@ func MakeConnection(config *SourceConfig) *rados.Conn {
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
-	return r.Method == "GET" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
+	return r.Method == "GET" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != "" && r.URL.Query().Get("cattr") != ""
 }
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
-	co := parseObj(req)
+	co := ParseCephObj(req)
 	return s.fetchObject(co)
 }
 
-func parseObj(req *http.Request) CephObject {
-	ns := req.URL.Query().Get("cns")
-	id := req.URL.Query().Get("cid")
+func ParseCephObj(req *http.Request) CephObject {
 	pool := req.URL.Query().Get("cpool")
-	return CephObject{ns, id, pool}
+	id := req.URL.Query().Get("coid")
+	attr := req.URL.Query().Get("cattr")
+	return CephObject{pool, id, attr}
 }
 
 func (s *CephImageSource) fetchObject(co CephObject) ([]byte, error) {
@@ -68,7 +68,7 @@ func (s *CephImageSource) fetchObject(co CephObject) ([]byte, error) {
 		return nil, err
 	}
 	buf := make([]byte, 1048676)
-	_, err = ioctx.GetXattr(co.NameSpace, co.OID, buf)
+	_, err = ioctx.GetXattr(co.OID, co.Attribute, buf)
 	if err != nil {
 		return nil, err
 	}
