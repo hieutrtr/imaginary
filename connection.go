@@ -6,7 +6,6 @@ type ConnectionType string
 type ConnectionFactoryFunction func(*ConnectionConfig) Connection
 
 type ConnectionConfig struct {
-	PoolName   string
 	EnableCeph bool
 	CephConfig string
 }
@@ -26,7 +25,6 @@ func RegisterConnection(connType ConnectionType, factory ConnectionFactoryFuncti
 func LoadConnections(o ServerOptions) {
 	for name, factory := range connectionFactoryMap {
 		connectionMap[name] = factory(&ConnectionConfig{
-			PoolName:   PoolName,
 			EnableCeph: o.EnableCeph,
 			CephConfig: o.CephConfig,
 		})

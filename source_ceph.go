@@ -8,11 +8,11 @@ import (
 )
 
 const ImageSourceTypeCeph ImageSourceType = "ceph"
-const PoolName string = "media"
 
 type CephObject struct {
 	NameSpace string
 	OID       string
+	Pool      string
 }
 
 type CephImageSource struct {
@@ -43,7 +43,7 @@ func MakeConnection(config *SourceConfig) *rados.Conn {
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
-	return r.Method == "GET" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
+	return r.Method == "GET" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
 }
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
@@ -54,14 +54,15 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 func parseObj(req *http.Request) CephObject {
 	ns := req.URL.Query().Get("cns")
 	id := req.URL.Query().Get("cid")
-	return CephObject{ns, id}
+	pool := req.URL.Query().Get("cpool")
+	return CephObject{ns, id, pool}
 }
 
 func (s *CephImageSource) fetchObject(co CephObject) ([]byte, error) {
 	if s.Config.EnableCeph == false {
 		return nil, fmt.Errorf("Ceph is not enable")
 	}
-	ioctx, err := s.Connection.OpenIOContext(PoolName)
+	ioctx, err := s.Connection.OpenIOContext(co.Pool)
 	defer ioctx.Destroy()
 	if err != nil {
 		return nil, err

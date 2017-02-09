@@ -37,14 +37,14 @@ func MakeCephConnection(config *ConnectionConfig) *rados.Conn {
 }
 
 func (c *CephConnection) Matches(r *http.Request) bool {
-	return r.Method == "POST" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
+	return r.Method == "POST" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("cns") != "" && r.URL.Query().Get("cid") != ""
 }
 
 func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 	if c.Config.EnableCeph == false {
 		return fmt.Errorf("Ceph is not enable")
 	}
-	ioctx, err := c.Conn.OpenIOContext(c.Config.PoolName)
+	ioctx, err := c.Conn.OpenIOContext(r.URL.Query().Get("cpool"))
 	defer ioctx.Destroy()
 	if err != nil {
 		return err
