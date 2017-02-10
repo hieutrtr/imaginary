@@ -1,55 +1,47 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
+import "net/http"
 
-	"github.com/noahdesu/go-ceph/rados"
-)
-
+// CephConnectionType name of regiter connection
 const CephConnectionType ConnectionType = "ceph"
 
+// CephConnection to register for Ceph
 type CephConnection struct {
-	Config *ConnectionConfig
-	Conn   *rados.Conn
+	Ceph
 }
 
+// NewCephConnection create new ceph connection
 func NewCephConnection(config *ConnectionConfig) Connection {
-	cephConn := &CephConnection{}
-	cephConn.Config = config
+	cc := &CephConnection{
+		Ceph: Ceph{
+			CephConfig: CephConfig{
+				ConfigPath: config.CephConfig,
+				Enable:     config.EnableCeph,
+			},
+		},
+	}
 	if config.EnableCeph {
-		cephConn.Conn = MakeCephConnection(config)
+		MakeConnection(cc)
 	}
-	return cephConn
-}
-
-func MakeCephConnection(config *ConnectionConfig) *rados.Conn {
-	conn, err := rados.NewConn()
-	if err != nil {
-		exitWithError("rados connection fail: %s", err)
-	}
-	conn.ReadConfigFile(config.CephConfig)
-	err = conn.Connect()
-	if err != nil {
-		exitWithError("rados connection fail: %s", err)
-	}
-	return conn
+	return cc
 }
 
 func (c *CephConnection) Matches(r *http.Request) bool {
-	return r.Method == "POST" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != "" && r.URL.Query().Get("cattr") != ""
+	return r.Method == "POST" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != ""
 }
 
+// Execute purpose of openning connection
 func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
-	if c.Config.EnableCeph == false {
-		return fmt.Errorf("Ceph is not enable")
+	if !c.IsEnable() {
+		return NewError("ceph: service is not supported", Unsupported)
 	}
-	ioctx, err := c.Conn.OpenIOContext(r.URL.Query().Get("cpool"))
-	defer ioctx.Destroy()
+	c.BindRequest(r)
+	err := c.OpenContext()
 	if err != nil {
 		return err
 	}
-	err = ioctx.SetXattr(r.URL.Query().Get("coid"), r.URL.Query().Get("cattr"), buf)
+	defer c.DestroyContext()
+	err = c.SetData(buf)
 	if err != nil {
 		return err
 	}

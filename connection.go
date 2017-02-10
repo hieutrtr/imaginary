@@ -5,6 +5,10 @@ import "net/http"
 type ConnectionType string
 type ConnectionFactoryFunction func(*ConnectionConfig) Connection
 
+type Connector interface {
+	Connect() error
+}
+
 type ConnectionConfig struct {
 	EnableCeph bool
 	CephConfig string
@@ -16,6 +20,12 @@ var connectionFactoryMap = make(map[ConnectionType]ConnectionFactoryFunction)
 type Connection interface {
 	Matches(*http.Request) bool
 	Execute(*http.Request, []byte) error
+}
+
+func MakeConnection(conn Connector) {
+	if err := conn.Connect(); err != nil {
+		exitWithError("connection fail: %s", err)
+	}
 }
 
 func RegisterConnection(connType ConnectionType, factory ConnectionFactoryFunction) {

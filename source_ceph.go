@@ -1,78 +1,50 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
+import "net/http"
 
-	"github.com/noahdesu/go-ceph/rados"
-)
-
+// ImageSourceTypeCeph name of regiter source
 const ImageSourceTypeCeph ImageSourceType = "ceph"
 
-type CephObject struct {
-	Pool      string
-	OID       string
-	Attribute string
-}
-
+// CephImageSource source to register for Ceph
 type CephImageSource struct {
-	Config     *SourceConfig
-	Connection *rados.Conn
+	Ceph
 }
 
+// NewCephImageSource create new ceph image source
 func NewCephImageSource(config *SourceConfig) ImageSource {
-	CISource := &CephImageSource{}
-	CISource.Config = config
+	cis := &CephImageSource{
+		Ceph: Ceph{
+			CephConfig: CephConfig{
+				ConfigPath: config.CephConfig,
+				Enable:     config.EnableCeph,
+			},
+		},
+	}
 	if config.EnableCeph {
-		CISource.Connection = MakeConnection(config)
+		MakeConnection(cis)
 	}
-	return CISource
-}
-
-func MakeConnection(config *SourceConfig) *rados.Conn {
-	conn, err := rados.NewConn()
-	if err != nil {
-		exitWithError("rados connection fail: %s", err)
-	}
-	conn.ReadConfigFile(config.CephConfig)
-	err = conn.Connect()
-	if err != nil {
-		exitWithError("rados connection fail: %s", err)
-	}
-	return conn
+	return cis
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
-	return r.Method == "GET" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != "" && r.URL.Query().Get("cattr") != ""
+	return r.Method == "GET" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != ""
 }
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
-	co := ParseCephObj(req)
-	return s.fetchObject(co)
+	s.BindRequest(req)
+	return s.fetchObject()
 }
 
-func ParseCephObj(req *http.Request) CephObject {
-	pool := req.URL.Query().Get("cpool")
-	id := req.URL.Query().Get("coid")
-	attr := req.URL.Query().Get("cattr")
-	return CephObject{pool, id, attr}
-}
-
-func (s *CephImageSource) fetchObject(co CephObject) ([]byte, error) {
-	if s.Config.EnableCeph == false {
-		return nil, fmt.Errorf("Ceph is not enable")
+func (s *CephImageSource) fetchObject() ([]byte, error) {
+	if !s.IsEnable() {
+		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
-	ioctx, err := s.Connection.OpenIOContext(co.Pool)
-	defer ioctx.Destroy()
+	err := s.OpenContext()
 	if err != nil {
 		return nil, err
 	}
-	buf := make([]byte, 1048676)
-	_, err = ioctx.GetXattr(co.OID, co.Attribute, buf)
-	if err != nil {
-		return nil, err
-	}
-	return buf, nil
+	defer s.DestroyContext()
+	return s.GetData()
 }
 
 func init() {
