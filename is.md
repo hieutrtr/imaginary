@@ -30,7 +30,12 @@ Support: `--data-binary` - Directly POST raw image data
 - coid `string` `required` - Image ID
 
 ### Fetching Image Through Varnish
-#####  `GET /<service>_<action>/<img_id>`
+
+#### Varnish Config
+GET /property_project/{id} -> GET /resize?width=600&height=460&cpool=property_project&coid={id}
+GET /property_project_thumb/{id} -> GET /thumbnail?width=100&cpool=property_project&coid={id}
+
+####  `GET /<service>_<action>/<img_id>`
 
 EX:
 ```
