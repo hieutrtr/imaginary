@@ -33,9 +33,11 @@ Support: `--data-binary` - Directly POST raw image data
 #####  `GET /<service>_<action>/<img_id>`
 
 EX:
-`GET /profile/190790 - Full size for profile picture`
-`GET /property_project_thumb/190790 - Thumbnail image`
-`GET /ads_wm/190790 - Watermark image`
+```
+GET /profile/190790 - Full size for profile picture
+GET /property_project_thumb/190790 - Thumbnail image
+GET /ads_wm/190790 - Watermark image
+```
 
 ### Fetching Image Directly
 
