@@ -57,7 +57,7 @@ func friendlyRoute(o ServerOptions) http.Handler {
 		if o.EnableFriendly {
 			vars := gorilla.Vars(r)
 			sq := ServiceQueryMap[vars["service"]]
-			r.URL.RawQuery = fmt.Sprintf("%s&coid=%s", sq.getQuery(vars["op"]), vars["id"])
+			r.URL.RawQuery = sq.getQuery(vars["op"], vars["id"])
 			Middleware(imageController(o, sq.getOperation(vars["op"])), o).ServeHTTP(w, r)
 		} else {
 			ErrorReply(r, w, ErrFriendlyNotAllowed, o)

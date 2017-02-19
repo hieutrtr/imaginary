@@ -4,13 +4,14 @@ import "fmt"
 
 const queryTypeAds string = "ads"
 
+// AdsQuery for ads service
 type AdsQuery struct {
 	queries QueryMap
 	ops     OperationMap
 }
 
-func (q *AdsQuery) getQuery(ot string) string {
-	return fmt.Sprintf("%s&cpool=%s", q.queries[ot], queryTypeAds)
+func (q *AdsQuery) getQuery(ot string, id string) string {
+	return fmt.Sprintf(CephQueryFormat, q.queries[ot], queryTypeAds, id)
 }
 
 func (q *AdsQuery) getOperation(ot string) Operation {

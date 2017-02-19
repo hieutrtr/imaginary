@@ -1,5 +1,8 @@
 package main
 
+// CephQueryFormat format query string by pool and oid
+const CephQueryFormat string = "%s&cpool=%s&coid=%s"
+
 // QueryMap mapping query with operation
 type QueryMap map[string]string
 type OperationMap map[string]Operation
@@ -9,7 +12,7 @@ var ServiceQueryMap = make(map[string]ServiceQuery)
 
 // ServiceQuery interface getting query by service's operation
 type ServiceQuery interface {
-	getQuery(string) string
+	getQuery(string, string) string
 	getOperation(string) Operation
 }
 
