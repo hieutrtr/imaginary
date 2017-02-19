@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daaku/go.httpgzip"
+	gorilla "github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"gopkg.in/h2non/bimg.v1"
 	"gopkg.in/throttled/throttled.v2"
@@ -45,6 +46,23 @@ func CephMiddleware(o ServerOptions) func(Operation) http.Handler {
 	return func(fn Operation) http.Handler {
 		return validateImage(Middleware(cephController(o, Operation(fn)), o), o)
 	}
+}
+
+func FriendlyImageMiddleware(o ServerOptions) http.Handler {
+	return validateImage(friendlyRoute(o), o)
+}
+
+func friendlyRoute(o ServerOptions) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if o.EnableFriendly {
+			vars := gorilla.Vars(r)
+			sq := ServiceQueryMap[vars["service"]]
+			r.URL.RawQuery = fmt.Sprintf("%s&coid=%s", sq.getQuery(vars["op"]), vars["id"])
+			Middleware(imageController(o, sq.getOperation(vars["op"])), o).ServeHTTP(w, r)
+		} else {
+			ErrorReply(r, w, ErrFriendlyNotAllowed, o)
+		}
+	})
 }
 
 func throttleError(err error) http.Handler {

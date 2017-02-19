@@ -49,6 +49,7 @@ var (
 	aCpus              = flag.Int("cpus", runtime.GOMAXPROCS(-1), "Number of cpu cores to use")
 	aEnableCeph        = flag.Bool("enable-ceph", false, "enable ceph integration")
 	aCephConf          = flag.String("ceph-conf", "/etc/ceph/ceph.conf", "path to ceph config")
+	aEnableFriendly    = flag.Bool("enable-friendly", false, "enable friendly by services")
 )
 
 const usage = `imaginary %s
@@ -97,6 +98,7 @@ Options:
                             (default for current machine is %d cores)
 	-enable-ceph              enable ceph integration
 	-ceph-config              path to ceph config
+	-enable-friendly					enable friendly url by services
 `
 
 func main() {
@@ -140,6 +142,7 @@ func main() {
 		MaxAllowedSize:    *aMaxAllowedSize,
 		EnableCeph:        *aEnableCeph,
 		CephConfig:        *aCephConf,
+		EnableFriendly:    *aEnableFriendly,
 	}
 
 	// Create a memory release goroutine
