@@ -52,7 +52,7 @@ func (c *Ceph) SetData(buf []byte) error {
 func (c *Ceph) GetData() ([]byte, error) {
 	buf := make([]byte, IMAGE_MAX_BYTE)
 	if _, err := c.Context.GetXattr(c.OID, DATA, buf); err != nil {
-		return nil, err
+		return nil, NewError("Data is not exists", NotFound)
 	}
 	// Remove any NULL characters from buffer
 	buf = bytes.Trim(buf, "\x00")
