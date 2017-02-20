@@ -89,6 +89,6 @@ func NewServerMux(o ServerOptions) http.Handler {
 
 	ceph := CephMiddleware(o)
 	mux.Handle(join(o, "/upload"), ceph(Info))
-	mux.Handle("/friendly/{op}/{service}/{id}", FriendlyImageMiddleware(o))
+	mux.Handle("/friendly/{service}/{op}/{id}", FriendlyImageMiddleware(o))
 	return mux
 }
