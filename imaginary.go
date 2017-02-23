@@ -50,6 +50,7 @@ var (
 	aEnableCeph        = flag.Bool("enable-ceph", false, "enable ceph integration")
 	aCephConf          = flag.String("ceph-conf", "/etc/ceph/ceph.conf", "path to ceph config")
 	aEnableFriendly    = flag.Bool("enable-friendly", false, "enable friendly by services")
+	aEnableSafeRoute   = flag.Bool("enable-safe-route", false, "enable safe route")
 )
 
 const usage = `imaginary %s
@@ -99,6 +100,7 @@ Options:
 	-enable-ceph              enable ceph integration
 	-ceph-config              path to ceph config
 	-enable-friendly					enable friendly url by services
+	-enable-safe-route				enable safe route url
 `
 
 func main() {
@@ -143,6 +145,7 @@ func main() {
 		EnableCeph:        *aEnableCeph,
 		CephConfig:        *aCephConf,
 		EnableFriendly:    *aEnableFriendly,
+		EnableSafeRoute:   *aEnableSafeRoute,
 	}
 
 	// Create a memory release goroutine

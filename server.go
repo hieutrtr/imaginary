@@ -37,6 +37,7 @@ type ServerOptions struct {
 	EnableCeph        bool
 	CephConfig        string
 	EnableFriendly    bool
+	EnableSafeRoute   bool
 }
 
 func Server(o ServerOptions) error {
@@ -61,6 +62,17 @@ func listenAndServe(s *http.Server, o ServerOptions) error {
 	return s.ListenAndServe()
 }
 
+func joinImageRoute(o ServerOptions, route string) string {
+	var middleRoute string
+	if o.EnableSafeRoute {
+		middleRoute = "/safe"
+	}
+	if o.EnableCeph {
+		middleRoute = middleRoute + "/{cpool}/{coid}"
+	}
+	return path.Join(o.PathPrefix, middleRoute, route)
+}
+
 func join(o ServerOptions, route string) string {
 	return path.Join(o.PathPrefix, route)
 }
@@ -74,18 +86,19 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(join(o, "/health"), Middleware(healthController, o))
 
 	image := ImageMiddleware(o)
-	mux.Handle(join(o, "/resize"), image(Resize))
-	mux.Handle(join(o, "/enlarge"), image(Enlarge))
-	mux.Handle(join(o, "/extract"), image(Extract))
-	mux.Handle(join(o, "/crop"), image(Crop))
-	mux.Handle(join(o, "/rotate"), image(Rotate))
-	mux.Handle(join(o, "/flip"), image(Flip))
-	mux.Handle(join(o, "/flop"), image(Flop))
-	mux.Handle(join(o, "/thumbnail"), image(Thumbnail))
-	mux.Handle(join(o, "/zoom"), image(Zoom))
-	mux.Handle(join(o, "/convert"), image(Convert))
-	mux.Handle(join(o, "/watermark"), image(Watermark))
-	mux.Handle(join(o, "/info"), image(Info))
+	mux.Handle(joinImageRoute(o, "/"), image(Origin))
+	mux.Handle(joinImageRoute(o, "/resize"), image(Resize))
+	mux.Handle(joinImageRoute(o, "/enlarge"), image(Enlarge))
+	mux.Handle(joinImageRoute(o, "/extract"), image(Extract))
+	mux.Handle(joinImageRoute(o, "/crop"), image(Crop))
+	mux.Handle(joinImageRoute(o, "/rotate"), image(Rotate))
+	mux.Handle(joinImageRoute(o, "/flip"), image(Flip))
+	mux.Handle(joinImageRoute(o, "/flop"), image(Flop))
+	mux.Handle(joinImageRoute(o, "/thumbnail"), image(Thumbnail))
+	mux.Handle(joinImageRoute(o, "/zoom"), image(Zoom))
+	mux.Handle(joinImageRoute(o, "/convert"), image(Convert))
+	mux.Handle(joinImageRoute(o, "/watermark"), image(Watermark))
+	mux.Handle(joinImageRoute(o, "/info"), image(Info))
 
 	ceph := CephMiddleware(o)
 	mux.Handle(join(o, "/upload"), ceph(Info))
