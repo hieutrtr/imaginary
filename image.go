@@ -225,3 +225,8 @@ func Process(buf []byte, opts bimg.Options) (out Image, err error) {
 	mime := GetImageMimeType(bimg.DetermineImageType(buf))
 	return Image{Body: buf, Mime: mime}, nil
 }
+
+func Origin(buf []byte, o ImageOptions) (Image, error) {
+	mime := GetImageMimeType(bimg.DetermineImageType(buf))
+	return Image{Body: buf, Mime: mime}, nil
+}
