@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/noahdesu/go-ceph/rados"
+
+	gorilla "github.com/gorilla/mux"
 )
 
 const (
@@ -77,9 +79,10 @@ func (c *Ceph) OpenContext() error {
 
 // BindRequest Initialize CephObject need to get ceph object
 func (c *Ceph) BindRequest(req *http.Request) {
+	vars := gorilla.Vars(req)
 	c.CephObject = CephObject{
-		Pool: req.URL.Query().Get("cpool"),
-		OID:  req.URL.Query().Get("coid"),
+		Pool: vars["cpool"],
+		OID:  vars["coid"],
 	}
 }
 

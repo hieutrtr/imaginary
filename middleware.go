@@ -56,8 +56,8 @@ func friendlyRoute(o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if o.EnableFriendly {
 			vars := gorilla.Vars(r)
-			sq := ServiceQueryMap[vars["service"]]
-			r.URL.RawQuery = sq.getQuery(vars["op"], vars["id"])
+			sq := ServiceQueryMap[vars["service"]]               // TODO : handle error
+			r.URL.RawQuery = sq.getQuery(vars["op"], vars["id"]) // TODO : handle error
 			Middleware(imageController(o, sq.getOperation(vars["op"])), o).ServeHTTP(w, r)
 		} else {
 			ErrorReply(r, w, ErrFriendlyNotAllowed, o)

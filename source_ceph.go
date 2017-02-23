@@ -1,6 +1,10 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	gorilla "github.com/gorilla/mux"
+)
 
 // ImageSourceTypeCeph name of regiter source
 const ImageSourceTypeCeph ImageSourceType = "ceph"
@@ -27,7 +31,8 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
-	return r.Method == "GET" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != ""
+	vars := gorilla.Vars(r)
+	return r.Method == "GET" && vars["cpool"] != "" && vars["coid"] != ""
 }
 
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
