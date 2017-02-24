@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -65,11 +66,12 @@ func listenAndServe(s *http.Server, o ServerOptions) error {
 func joinImageRoute(o ServerOptions, route string) string {
 	var middleRoute string
 	if o.EnableSafeRoute {
-		middleRoute = "/safe"
+		middleRoute = "/{safe_key}"
 	}
 	if o.EnableCeph {
 		middleRoute = middleRoute + "/{cpool}/{coid}"
 	}
+	fmt.Println(middleRoute)
 	return path.Join(o.PathPrefix, middleRoute, route)
 }
 
