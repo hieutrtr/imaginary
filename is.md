@@ -17,7 +17,8 @@
 
 ### Form Data:
 
-If you're pushing images to `imaginary` as `multipart/form-data` (you can do it as well as `--data-binary`), you must define at least one input field called `file` with the raw image data in order to be processed properly by imaginary.
+If you're pushing images to `imaginary` as `multipart/form-data` (you can do it as well as `--data-binary`), you must define at least one input field ca
+lled `file` with the raw image data in order to be processed properly by imaginary.
 
 ### Upload Image
 
@@ -46,6 +47,15 @@ GET /ads_wm/190790 - Watermark image
 
 ### Fetching Image Directly
 
+#### Ceph prefix
+If Ceph is enabled
+required  - `/{cpool}/{coid}`
+
+- cpool `string` - Specific Ceph Pool (for every service)
+- coid `string` - Specific object id of the Pool of
+
+Example : `/{cpool}/{coid}/resize?width=600&height=400`
+
 #### GET | POST /info
 Accepts: `image/*, multipart/form-data`. Content-Type: `application/json`
 
@@ -70,8 +80,6 @@ Crop the image by a given width or height. Image ratio is maintained
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - width `int`
 - height `int`
 - quality `int` (JPEG-only)
@@ -99,8 +107,6 @@ Resize an image by width or height. Image aspect ratio is maintained
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - width `int` `required`
 - height `int`
 - quality `int` (JPEG-only)
@@ -125,8 +131,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - width `int` `required`
 - height `int` `required`
 - quality `int` (JPEG-only)
@@ -151,8 +155,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - top `int` `required`
 - left `int`
 - areawidth `int` `required`
@@ -181,8 +183,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - factor `number` `required`
 - width `int`
 - height `int`
@@ -208,8 +208,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - width `int`
 - height `int`
 - quality `int` (JPEG-only)
@@ -234,8 +232,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - rotate `int` `required`
 - width `int`
 - height `int`
@@ -260,8 +256,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - width `int`
 - height `int`
 - quality `int` (JPEG-only)
@@ -285,8 +279,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - width `int`
 - height `int`
 - quality `int` (JPEG-only)
@@ -310,8 +302,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - type `string` `required`
 - quality `int` (JPEG-only)
 - compression `int` (PNG-only)
@@ -334,8 +324,6 @@ Accepts: `image/*, multipart/form-data`. Content-Type: `image/*`
 
 ##### Allowed params
 
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of Service
 - text `string` `required`
 - margin `int`
 - dpi `int`
