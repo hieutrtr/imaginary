@@ -1,6 +1,10 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	gorilla "github.com/gorilla/mux"
+)
 
 // CephConnectionType name of regiter connection
 const CephConnectionType ConnectionType = "ceph"
@@ -27,7 +31,8 @@ func NewCephConnection(config *ConnectionConfig) Connection {
 }
 
 func (c *CephConnection) Matches(r *http.Request) bool {
-	return r.Method == "POST" && r.URL.Query().Get("cpool") != "" && r.URL.Query().Get("coid") != ""
+	vars := gorilla.Vars(r)
+	return r.Method == "POST" && vars["cpool"] != "" && vars["coid"] != ""
 }
 
 // Execute purpose of openning connection
