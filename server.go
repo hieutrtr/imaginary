@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -71,7 +70,6 @@ func joinImageRoute(o ServerOptions, route string) string {
 	if o.EnableCeph {
 		middleRoute = middleRoute + "/{cpool}/{coid}"
 	}
-	fmt.Println(middleRoute)
 	return path.Join(o.PathPrefix, middleRoute, route)
 }
 
