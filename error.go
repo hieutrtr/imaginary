@@ -29,8 +29,8 @@ var (
 	ErrMissingParamFile   = NewError("Missing required param: file", BadRequest)
 	ErrInvalidFilePath    = NewError("Invalid file path", BadRequest)
 	ErrInvalidImageURL    = NewError("Invalid image URL", BadRequest)
-	ErrMissingImageSource = NewError("Cannot process the image due to missing or invalid params", BadRequest)
-	ErrMissingConnection  = NewError("Cannot process the image due to missing or invalid params", BadRequest)
+	ErrMissingImageSource = NewError("Cannot process the image from source due to missing or invalid params", BadRequest)
+	ErrMissingConnection  = NewError("Cannot process the image from connection due to missing or invalid params", BadRequest)
 	ErrFriendlyNotAllowed = NewError("Friendly route is not enable", Unsupported)
 )
 
