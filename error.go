@@ -32,6 +32,7 @@ var (
 	ErrMissingImageSource = NewError("Cannot process the image from source due to missing or invalid params", BadRequest)
 	ErrMissingConnection  = NewError("Cannot process the image from connection due to missing or invalid params", BadRequest)
 	ErrFriendlyNotAllowed = NewError("Friendly route is not enable", Unsupported)
+	ErrSafeHash           = NewError("Unsafe request", BadRequest)
 )
 
 type Error struct {
