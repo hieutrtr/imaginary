@@ -38,6 +38,7 @@ type ServerOptions struct {
 	CephConfig        string
 	EnableFriendly    bool
 	EnableSafeRoute   bool
+	SafeKey           string
 }
 
 func Server(o ServerOptions) error {
@@ -65,7 +66,7 @@ func listenAndServe(s *http.Server, o ServerOptions) error {
 func joinImageRoute(o ServerOptions, route string) string {
 	var middleRoute string
 	if o.EnableSafeRoute {
-		middleRoute = "/{safe_key}"
+		middleRoute = "/{safehash}"
 	}
 	if o.EnableCeph {
 		middleRoute = middleRoute + "/{cpool}/{coid}"

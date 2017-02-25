@@ -51,6 +51,7 @@ var (
 	aCephConf          = flag.String("ceph-conf", "/etc/ceph/ceph.conf", "path to ceph config")
 	aEnableFriendly    = flag.Bool("enable-friendly", false, "enable friendly by services")
 	aEnableSafeRoute   = flag.Bool("enable-safe-route", false, "enable safe route")
+	aSafeKey           = flag.String("safe-key", "", "secret key to hash URI that is used with enable-safe-route")
 )
 
 const usage = `imaginary %s
@@ -101,6 +102,7 @@ Options:
 	-ceph-config              path to ceph config
 	-enable-friendly					enable friendly url by services
 	-enable-safe-route				enable safe route url
+	-safe-key									secret key to hash URI that is used with enable-safe-route
 `
 
 func main() {
@@ -146,6 +148,7 @@ func main() {
 		CephConfig:        *aCephConf,
 		EnableFriendly:    *aEnableFriendly,
 		EnableSafeRoute:   *aEnableSafeRoute,
+		SafeKey:           *aSafeKey,
 	}
 
 	// Create a memory release goroutine
@@ -179,6 +182,10 @@ func main() {
 	} else if *aEnablePlaceholder {
 		// Expose default placeholder
 		opts.PlaceholderImage = placeholder
+	}
+
+	if *aEnableSafeRoute && *aSafeKey == "" {
+		exitWithError("Need a safe key to enable safe routing")
 	}
 
 	debug("imaginary server listening on port :%d/%s", opts.Port, strings.TrimPrefix(opts.PathPrefix, "/"))

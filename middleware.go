@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strings"
@@ -33,7 +36,31 @@ func Middleware(fn func(http.ResponseWriter, *http.Request), o ServerOptions) ht
 		next = setCacheHeaders(next, o.HttpCacheTtl)
 	}
 
+	if o.EnableSafeRoute {
+		next = checkSafeKey(next, o)
+	}
+
 	return validate(defaultHeaders(next), o)
+}
+
+func checkSafeKey(next http.Handler, o ServerOptions) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := gorilla.Vars(r)
+		safeHash := vars["safehash"]
+		route := strings.Replace(r.URL.RequestURI(), "/"+safeHash, "", 1)
+		if safeHash == "" || safeHash != hashRoute([]byte(route), []byte(o.SafeKey)) {
+			ErrorReply(r, w, ErrSafeHash, o)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// hashRoute to sha1 with safeKey then encoding as hex
+func hashRoute(route []byte, safeKey []byte) string {
+	mac := hmac.New(sha1.New, safeKey)
+	mac.Write(route)
+	return hex.EncodeToString(mac.Sum(nil))
 }
 
 func ImageMiddleware(o ServerOptions) func(Operation) http.Handler {
