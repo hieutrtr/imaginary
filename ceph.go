@@ -57,6 +57,9 @@ func (c *Ceph) GetData() ([]byte, error) {
 		return nil, NewError("Data is not exists", NotFound)
 	}
 	// Remove any NULL characters from buffer
+	if buf == nil {
+		return nil, NewError("Data is not exists", NotFound)
+	}
 	buf = bytes.Trim(buf, "\x00")
 	return buf, nil
 }
