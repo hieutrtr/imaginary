@@ -4,10 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"runtime"
 	d "runtime/debug"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -52,6 +54,9 @@ var (
 	aEnableFriendly    = flag.Bool("enable-friendly", false, "enable friendly by services")
 	aEnableSafeRoute   = flag.Bool("enable-safe-route", false, "enable safe route")
 	aSafeKey           = flag.String("safe-key", "", "secret key to hash URI that is used with enable-safe-route")
+	aCpuprofile        = flag.String("cpuprofile", "", "write cpu profile `file`")
+	aMemprofile        = flag.String("memprofile", "", "write memory profile to `file`")
+	aProfilingTimeout  = flag.Int("prof-timeout", 10, "Time to tracking profiling before termination")
 )
 
 const usage = `imaginary %s
@@ -110,6 +115,8 @@ func main() {
 		fmt.Fprint(os.Stderr, fmt.Sprintf(usage, Version, runtime.NumCPU()))
 	}
 	flag.Parse()
+
+	go profilling()
 
 	if *aHelp || *aHelpl {
 		showUsage()
@@ -198,6 +205,37 @@ func main() {
 	err := Server(opts)
 	if err != nil {
 		exitWithError("cannot start the server: %s", err)
+	}
+}
+
+func profilling() {
+	if *aCpuprofile != "" {
+		f, err := os.Create(*aCpuprofile)
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+
+		go func() {
+			timeout := *aProfilingTimeout
+			time.Sleep(time.Second * time.Duration(timeout))
+			pprof.StopCPUProfile()
+
+			if *aMemprofile != "" {
+				f, err := os.Create(*aMemprofile)
+				if err != nil {
+					log.Fatal("could not create memory profile: ", err)
+				}
+				runtime.GC() // get up-to-date statistics
+				if err := pprof.WriteHeapProfile(f); err != nil {
+					log.Fatal("could not write memory profile: ", err)
+				}
+				f.Close()
+			}
+			os.Exit(1)
+		}()
 	}
 }
 
