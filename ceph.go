@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io"
 	"net/http"
 
 	"github.com/noahdesu/go-ceph/rados"
@@ -52,16 +53,19 @@ func (c *Ceph) SetData(buf []byte) error {
 
 // GetData fetch object attribute DATA from ceph
 func (c *Ceph) GetData() ([]byte, error) {
-	buf := make([]byte, IMAGE_MAX_BYTE)
-	if _, err := c.Context.GetXattr(c.OID, DATA, buf); err != nil {
+	data := make([]byte, IMAGE_MAX_BYTE)
+	leng, err := c.Context.GetXattr(c.OID, DATA, data)
+	if err != nil {
 		return nil, NewError("Data is not exists", NotFound)
 	}
 	// Remove any NULL characters from buffer
-	if buf == nil {
+	if data == nil {
 		return nil, NewError("Data is not exists", NotFound)
 	}
-	buf = bytes.Trim(buf, "\x00")
-	return buf, nil
+
+	buf := bytes.NewBuffer(make([]byte, 0, leng+1))
+	io.Copy(buf, bytes.NewReader(data[:leng]))
+	return buf.Bytes(), nil
 }
 
 // DestroyContext when finish ceph jobs
