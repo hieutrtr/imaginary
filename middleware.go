@@ -36,21 +36,19 @@ func Middleware(fn func(http.ResponseWriter, *http.Request), o ServerOptions) ht
 		next = setCacheHeaders(next, o.HttpCacheTtl)
 	}
 
-	if o.EnableSafeRoute {
-		next = checkSafeKey(next, o)
-	}
-
 	return validate(defaultHeaders(next), o)
 }
 
 func checkSafeKey(next http.Handler, o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		vars := gorilla.Vars(r)
-		safeHash := vars["safehash"]
-		route := strings.Replace(r.URL.RequestURI(), "/"+safeHash, "", 1)
-		if safeHash == "" || safeHash != hashRoute([]byte(route), []byte(o.SafeKey)) {
-			ErrorReply(r, w, ErrSafeHash, o)
-			return
+		if o.EnableSafeRoute {
+			vars := gorilla.Vars(r)
+			safeHash := vars["safehash"]
+			route := strings.Replace(r.URL.RequestURI(), "/"+safeHash, "", 1)
+			if safeHash == "" || safeHash != hashRoute([]byte(route), []byte(o.SafeKey)) {
+				ErrorReply(r, w, ErrSafeHash, o)
+				return
+			}
 		}
 		next.ServeHTTP(w, r)
 	})
@@ -65,7 +63,7 @@ func hashRoute(route []byte, safeKey []byte) string {
 
 func ImageMiddleware(o ServerOptions) func(Operation) http.Handler {
 	return func(fn Operation) http.Handler {
-		return validateImage(Middleware(imageController(o, Operation(fn)), o), o)
+		return validateImage(checkSafeKey(Middleware(imageController(o, Operation(fn)), o), o), o)
 	}
 }
 
