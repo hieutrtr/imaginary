@@ -86,6 +86,9 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(join(o, "/form"), Middleware(formController, o))
 	mux.Handle(join(o, "/health"), Middleware(healthController, o))
 
+	ceph := CephMiddleware(o)
+	mux.Handle(join(o, "/upload/{cpool}/{coid}"), ceph(Info))
+
 	image := ImageMiddleware(o)
 	mux.Handle(joinImageRoute(o, "/"), image(Origin))
 	mux.Handle(joinImageRoute(o, "/resize"), image(Resize))
@@ -101,8 +104,6 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(joinImageRoute(o, "/watermark"), image(Watermark))
 	mux.Handle(joinImageRoute(o, "/info"), image(Info))
 
-	ceph := CephMiddleware(o)
-	mux.Handle(joinImageRoute(o, "/upload"), ceph(Info))
 	mux.Handle("/friendly/{service}/{op}/{id}", FriendlyImageMiddleware(o))
 	return mux
 }
