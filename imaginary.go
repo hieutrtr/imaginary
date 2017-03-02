@@ -45,7 +45,7 @@ var (
 	aHttpCacheTtl      = flag.Int("http-cache-ttl", -1, "The TTL in seconds")
 	aReadTimeout       = flag.Int("http-read-timeout", 60, "HTTP read timeout in seconds")
 	aWriteTimeout      = flag.Int("http-write-timeout", 60, "HTTP write timeout in seconds")
-	aConcurrency       = flag.Int("concurrency", getENVDefault("CONCURRENCY"), "Throttle concurrency limit per second")
+	aConcurrency       = flag.Int("concurrency", getENVDefault("CONCURRENCY", 0), "Throttle concurrency limit per second")
 	aBurst             = flag.Int("burst", 100, "Throttle burst max cache size")
 	aMRelease          = flag.Int("mrelease", 30, "OS memory release interval in seconds")
 	aCpus              = flag.Int("cpus", runtime.GOMAXPROCS(-1), "Number of cpu cores to use")
