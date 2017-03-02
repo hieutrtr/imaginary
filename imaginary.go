@@ -45,7 +45,7 @@ var (
 	aHttpCacheTtl      = flag.Int("http-cache-ttl", -1, "The TTL in seconds")
 	aReadTimeout       = flag.Int("http-read-timeout", 60, "HTTP read timeout in seconds")
 	aWriteTimeout      = flag.Int("http-write-timeout", 60, "HTTP write timeout in seconds")
-	aConcurrency       = flag.Int("concurrency", 0, "Throttle concurrency limit per second")
+	aConcurrency       = flag.Int("concurrency", getENVDefault("CONCURRENCY"), "Throttle concurrency limit per second")
 	aBurst             = flag.Int("burst", 100, "Throttle burst max cache size")
 	aMRelease          = flag.Int("mrelease", 30, "OS memory release interval in seconds")
 	aCpus              = flag.Int("cpus", runtime.GOMAXPROCS(-1), "Number of cpu cores to use")
@@ -58,6 +58,13 @@ var (
 	aMemprofile        = flag.String("memprofile", "", "write memory profile to `file`")
 	aProfilingTimeout  = flag.Int("prof-timeout", 10, "Time to tracking profiling before termination")
 )
+
+func getENVDefault(env string, def string) string {
+	if val := os.Getenv(env); val == "" {
+		return val
+	}
+	return def
+}
 
 const usage = `imaginary %s
 
@@ -98,7 +105,7 @@ Options:
   -keyfile <path>           TLS private key file path
   -authorization <value>    Defines a constant Authorization header value passed to all the image source servers. -enable-url-source flag must be defined. This overwrites authorization headers forwarding behavior via X-Forward-Authorization
   -placeholder <path>       Image path to image custom placeholder to be used in case of error. Recommended minimum image size is: 1200x1200
-	-concurreny <num>         Throttle concurrency limit per second [default: disabled]
+	-concurrency <num>         Throttle concurrency limit per second [default: disabled]
   -burst <num>              Throttle burst max cache size [default: 100]
   -mrelease <num>           OS memory release interval in seconds [default: 30]
   -cpus <num>               Number of used cpu cores.

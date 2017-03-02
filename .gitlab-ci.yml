@@ -25,7 +25,6 @@ dockerize:
 clean:docker:
   stage: clean
   script:
-  - docker rm $(docker ps -aq f status=exited)
   - docker images
   - docker rmi -f docker.chotot.org/$DIST_NAME:$VERSION
   tags:
