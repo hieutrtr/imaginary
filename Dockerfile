@@ -15,13 +15,6 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-# Install librados
-# RUN git clone https://github.com/ceph/ceph.git
-ADD ./ceph /
-WORKDIR /ceph
-RUN ./install-deps.sh && ./do_cmake.sh \
-  && cd build && make && make install
-
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
 ENV GOLANG_DOWNLOAD_SHA256 43ad621c9b014cde8db17393dc108378d37bc853aa351a6c74bf6432c1bbd182
 
