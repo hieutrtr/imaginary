@@ -21,7 +21,7 @@ const (
 // Ceph main struct of ceph
 type Ceph struct {
 	Connection *rados.Conn
-	Context    *rados.IOContext
+	Context    map[string]*rados.IOContext
 	CephObject
 	CephConfig
 }
@@ -38,6 +38,14 @@ type CephObject struct {
 	OID  string
 }
 
+// OnContext check if context in request is registered
+func (c *Ceph) OnContext() bool {
+	if c.Context[c.Pool] == nil {
+		return false
+	}
+	return true
+}
+
 // IsEnable check ceph is served
 func (c *Ceph) IsEnable() bool {
 	return c.Enable
@@ -45,7 +53,7 @@ func (c *Ceph) IsEnable() bool {
 
 // SetData push data to ceph object
 func (c *Ceph) SetData(buf []byte) error {
-	if err := c.Context.SetXattr(c.OID, DATA, buf); err != nil {
+	if err := c.Context[c.Pool].SetXattr(c.OID, DATA, buf); err != nil {
 		return err
 	}
 	return nil
@@ -54,7 +62,7 @@ func (c *Ceph) SetData(buf []byte) error {
 // GetData fetch object attribute DATA from ceph
 func (c *Ceph) GetData() ([]byte, error) {
 	data := make([]byte, IMAGE_MAX_BYTE)
-	leng, err := c.Context.GetXattr(c.OID, DATA, data)
+	leng, err := c.Context[c.Pool].GetXattr(c.OID, DATA, data)
 	if err != nil {
 		return nil, NewError("Data is not exists", NotFound)
 	}
@@ -70,14 +78,14 @@ func (c *Ceph) GetData() ([]byte, error) {
 
 // DestroyContext when finish ceph jobs
 func (c *Ceph) DestroyContext() {
-	c.Context.Destroy()
+	c.Context[c.Pool].Destroy()
 }
 
 // OpenContext provide context from existed pool on ceph cluster
 // Should ask sysad to create pool on ceph first
 func (c *Ceph) OpenContext() error {
 	ioctx, err := c.Connection.OpenIOContext(c.Pool)
-	c.Context = ioctx
+	c.Context[c.Pool] = ioctx
 	if err != nil {
 		return NewError("ceph: cannot open context of pool "+c.Pool, BadRequest)
 	}

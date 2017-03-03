@@ -44,11 +44,12 @@ func (s *CephImageSource) fetchObject() ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
-	err := s.OpenContext()
-	if err != nil {
-		return nil, err
+	if !s.OnContext() {
+		err := s.OpenContext()
+		if err != nil {
+			return nil, err
+		}
 	}
-	defer s.DestroyContext()
 	return s.GetData()
 }
 
