@@ -41,12 +41,11 @@ func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 		return NewError("ceph: service is not supported", Unsupported)
 	}
 	c.BindRequest(r)
-	if c.Context == nil {
-		err := c.OpenContext()
-		if err != nil {
-			return err
-		}
+	err := c.OpenContext()
+	if err != nil {
+		return err
 	}
+	defer c.DestroyContext()
 	return c.SetData(buf)
 }
 

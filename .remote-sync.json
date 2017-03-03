@@ -1,0 +1,15 @@
+{
+  "uploadOnSave": true,
+  "deleteLocal": false,
+  "hostname": "wronghole",
+  "port": "22",
+  "target": "/root/go/src/github.com/hieutrtr/imaginary",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**"
+  ],
+  "username": "root",
+  "keyfile": "/Users/hieutrtr/.ssh/id_rsa",
+  "passphrase": "1547896sS",
+  "transport": "scp"
+}
