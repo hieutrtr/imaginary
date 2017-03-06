@@ -86,10 +86,8 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(join(o, "/form"), Middleware(formController, o))
 	mux.Handle(join(o, "/health"), Middleware(healthController, o))
 
-	ceph := CephMiddleware(o)
-	mux.Handle(join(o, "/upload/{cpool}/{coid}"), ceph(Info))
-
 	image := ImageMiddleware(o)
+	mux.Handle(join(o, "/upload/{cpool}/{coid}"), image(Info))
 	mux.Handle(joinImageRoute(o, "/"), image(Origin))
 	mux.Handle(joinImageRoute(o, "/resize"), image(Resize))
 	mux.Handle(joinImageRoute(o, "/enlarge"), image(Enlarge))

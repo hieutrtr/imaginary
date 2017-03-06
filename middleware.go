@@ -35,13 +35,16 @@ func Middleware(fn func(http.ResponseWriter, *http.Request), o ServerOptions) ht
 	if o.HttpCacheTtl >= 0 {
 		next = setCacheHeaders(next, o.HttpCacheTtl)
 	}
+	if o.EnableSafeRoute {
+		next = checkSafeKey(next, o)
+	}
 
 	return validate(defaultHeaders(next), o)
 }
 
 func checkSafeKey(next http.Handler, o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if o.EnableSafeRoute {
+		if !IsUpload(r) { // Upload request dont need checking hash key
 			vars := gorilla.Vars(r)
 			safeHash := vars["safehash"]
 			route := strings.Replace(r.URL.RequestURI(), "/"+safeHash, "", 1)
@@ -63,13 +66,8 @@ func hashRoute(route []byte, safeKey []byte) string {
 
 func ImageMiddleware(o ServerOptions) func(Operation) http.Handler {
 	return func(fn Operation) http.Handler {
-		return validateImage(checkSafeKey(Middleware(imageController(o, Operation(fn)), o), o), o)
-	}
-}
-
-func CephMiddleware(o ServerOptions) func(Operation) http.Handler {
-	return func(fn Operation) http.Handler {
-		return validateImage(Middleware(cephController(o, Operation(fn)), o), o)
+		// return validateImage(checkSafeKey(Middleware(imageController(o, Operation(fn)), o), o), o)
+		return validateImage(Middleware(imageController(o, Operation(fn)), o), o)
 	}
 }
 
