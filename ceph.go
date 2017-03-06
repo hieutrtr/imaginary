@@ -85,13 +85,13 @@ func (c *Ceph) DestroyContext() {
 // Should ask sysad to create pool on ceph first
 func (c *Ceph) OpenContext() error {
 	ioctx, err := c.Connection.OpenIOContext(c.Pool)
+	if err != nil {
+		return NewError("ceph: cannot open context of pool "+c.Pool, BadRequest)
+	}
 	if c.Context == nil {
 		c.Context = make(map[string]*rados.IOContext)
 	}
 	c.Context[c.Pool] = ioctx
-	if err != nil {
-		return NewError("ceph: cannot open context of pool "+c.Pool, BadRequest)
-	}
 	return nil
 }
 
