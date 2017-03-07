@@ -14,6 +14,8 @@ type Event interface {
 	payloadBuild() (*sarama.ProducerMessage, error)
 }
 
+const UploadEventPrefix = "imaginary-upload-"
+
 // UploadEvent is uploading image event structure
 type UploadEvent struct {
 	Topic string
@@ -25,7 +27,7 @@ func (e *UploadEvent) payloadBuild() (*sarama.ProducerMessage, error) {
 		return nil, ErrMessage
 	}
 	mess := &sarama.ProducerMessage{
-		Topic: e.Topic,
+		Topic: UploadEventPrefix + e.Topic,
 		Key:   sarama.StringEncoder(e.Oid),
 		Value: sarama.StringEncoder(e.Oid),
 	}
