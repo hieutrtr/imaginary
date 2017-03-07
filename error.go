@@ -35,6 +35,7 @@ var (
 	ErrSafeHash           = NewError("Unsafe request", BadRequest)
 )
 
+// Error main error handler
 type Error struct {
 	Message string `json:"message,omitempty"`
 	Code    uint8  `json:"code"`

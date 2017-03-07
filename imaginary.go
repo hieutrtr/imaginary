@@ -57,6 +57,7 @@ var (
 	aCpuprofile        = flag.String("cpuprofile", "", "write cpu profile `file`")
 	aMemprofile        = flag.String("memprofile", "", "write memory profile to `file`")
 	aProfilingTimeout  = flag.Int("prof-timeout", 10, "Time to tracking profiling before termination")
+	aEnableTracking    = flag.Bool("enable-tracking", false, "Enable tracking event")
 )
 
 const usage = `imaginary %s
@@ -73,6 +74,8 @@ Usage:
 	imaginary -enable-placeholder
 	imaginery -enable-url-source -placeholder ./placeholder.jpg
 	imaginary -enable-ceph -ceph-config /etc/ceph/ceph.conf
+	imaginary -enable-safe-route -safe-key "secret-hash"
+	imaginary -enable-tracking
 	imaginary -h | -help
   imaginary -v | -version
 
@@ -108,6 +111,7 @@ Options:
 	-enable-friendly					enable friendly url by services
 	-enable-safe-route				enable safe route url
 	-safe-key									secret key to hash URI that is used with enable-safe-route
+	-enable-tracking 					tracking event
 `
 
 func main() {
@@ -156,6 +160,7 @@ func main() {
 		EnableFriendly:    *aEnableFriendly,
 		EnableSafeRoute:   *aEnableSafeRoute,
 		SafeKey:           *aSafeKey,
+		EnableTracking:    *aEnableTracking,
 	}
 
 	// Create a memory release goroutine

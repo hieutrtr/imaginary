@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hieutrtr/imaginary/kafka"
+
 	"github.com/daaku/go.httpgzip"
 	gorilla "github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -17,9 +19,26 @@ import (
 	"gopkg.in/throttled/throttled.v2/store/memstore"
 )
 
+// TrackingUploadEvent is mean pushing upload image event to Kafka
+func TrackingUploadEvent(next http.Handler, o ServerOptions) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		if IsUpload(r) {
+			vars := gorilla.Vars(r)
+			e := &kafka.UploadEvent{
+				Topic: vars["cpool"],
+				Oid:   vars["coid"],
+			}
+			kafka.Produce(e)
+		}
+	})
+}
+
 func Middleware(fn func(http.ResponseWriter, *http.Request), o ServerOptions) http.Handler {
 	next := http.Handler(http.HandlerFunc(fn))
-
+	if o.EnableTracking {
+		next = TrackingUploadEvent(next, o)
+	}
 	if o.Concurrency > 0 {
 		next = throttle(next, o)
 	}
@@ -66,7 +85,6 @@ func hashRoute(route []byte, safeKey []byte) string {
 
 func ImageMiddleware(o ServerOptions) func(Operation) http.Handler {
 	return func(fn Operation) http.Handler {
-		// return validateImage(checkSafeKey(Middleware(imageController(o, Operation(fn)), o), o), o)
 		return validateImage(Middleware(imageController(o, Operation(fn)), o), o)
 	}
 }

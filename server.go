@@ -39,6 +39,7 @@ type ServerOptions struct {
 	EnableFriendly    bool
 	EnableSafeRoute   bool
 	SafeKey           string
+	EnableTracking    bool
 }
 
 func Server(o ServerOptions) error {
