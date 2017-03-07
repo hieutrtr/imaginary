@@ -22,10 +22,11 @@ type UploadEvent struct {
 
 func (e *UploadEvent) payloadBuild() (*sarama.ProducerMessage, error) {
 	if e.Topic == "" {
-		return nil, EventError{"Missing topic", 1}
+		return nil, ErrMessage
 	}
 	mess := &sarama.ProducerMessage{
 		Topic: e.Topic,
+		Key:   sarama.StringEncoder(e.Oid),
 		Value: sarama.StringEncoder(e.Oid),
 	}
 	return mess, nil
@@ -39,7 +40,7 @@ func Produce(e Event) error {
 	}
 	_, _, err = producer.SendMessage(mess)
 	if err != nil {
-		return err
+		return ErrMessage
 	}
 	return nil
 }
