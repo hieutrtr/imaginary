@@ -1,7 +1,7 @@
 {
   "uploadOnSave": true,
   "deleteLocal": false,
-  "hostname": "wronghole",
+  "hostname": "10.60.6.12",
   "port": "22",
   "target": "/root/go/src/github.com/hieutrtr/imaginary",
   "ignore": [

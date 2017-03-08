@@ -58,6 +58,8 @@ var (
 	aMemprofile        = flag.String("memprofile", "", "write memory profile to `file`")
 	aProfilingTimeout  = flag.Int("prof-timeout", 10, "Time to tracking profiling before termination")
 	aEnableTracking    = flag.Bool("enable-tracking", false, "Enable tracking event")
+	aUseCephBlock      = flag.Bool("use-ceph-block", false, "Use ceph block")
+	aCephBlockUrl      = flag.String("ceph-block-url", "", "Ceph block base dir")
 )
 
 const usage = `imaginary %s
@@ -161,6 +163,8 @@ func main() {
 		EnableSafeRoute:   *aEnableSafeRoute,
 		SafeKey:           *aSafeKey,
 		EnableTracking:    *aEnableTracking,
+		UseCephBlock:      *aUseCephBlock,
+		CephBlockURL:      *aCephBlockUrl,
 	}
 
 	// Create a memory release goroutine

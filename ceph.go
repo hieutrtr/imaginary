@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -30,12 +31,19 @@ type Ceph struct {
 type CephConfig struct {
 	ConfigPath string
 	Enable     bool
+	UseBlock   bool
+	BlockURL   string
 }
 
 // CephObject need to get ceph object
 type CephObject struct {
 	Pool string
 	OID  string
+}
+
+// GetBlockPath build block storage path
+func (c *Ceph) GetBlockPath() string {
+	return fmt.Sprintf("/%s/%s/%s", c.BlockURL, c.Pool, c.OID)
 }
 
 // OnContext check if context in request is registered

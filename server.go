@@ -40,6 +40,8 @@ type ServerOptions struct {
 	EnableSafeRoute   bool
 	SafeKey           string
 	EnableTracking    bool
+	UseCephBlock      bool
+	CephBlockURL      string
 }
 
 func Server(o ServerOptions) error {

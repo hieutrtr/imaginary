@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	gorilla "github.com/gorilla/mux"
@@ -21,6 +23,8 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 			CephConfig: CephConfig{
 				ConfigPath: config.CephConfig,
 				Enable:     config.EnableCeph,
+				UseBlock:   config.UseCephBlock,
+				BlockURL:   config.CephBlockURL,
 			},
 		},
 	}
@@ -35,15 +39,24 @@ func (s *CephImageSource) Matches(r *http.Request) bool {
 	return r.Method == "GET" && vars["cpool"] != "" && vars["coid"] != ""
 }
 
+// GetImage from ceph
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
-	s.BindRequest(req)
-	return s.fetchObject()
-}
-
-func (s *CephImageSource) fetchObject() ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
+	s.BindRequest(req)
+	if s.UseBlock {
+		return s.readFromBlock()
+	}
+	return s.fetchObject()
+}
+
+func (s *CephImageSource) readFromBlock() ([]byte, error) {
+	fmt.Println("Using Ceph Block")
+	return ioutil.ReadFile(s.GetBlockPath())
+}
+
+func (s *CephImageSource) fetchObject() ([]byte, error) {
 	if !s.OnContext() {
 		err := s.OpenContext()
 		if err != nil {
