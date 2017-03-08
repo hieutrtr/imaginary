@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	gorilla "github.com/gorilla/mux"
@@ -21,6 +23,8 @@ func NewCephConnection(config *ConnectionConfig) Connection {
 			CephConfig: CephConfig{
 				ConfigPath: config.CephConfig,
 				Enable:     config.EnableCeph,
+				UseBlock:   config.UseCephBlock,
+				BlockURL:   config.CephBlockURL,
 			},
 		},
 	}
@@ -35,12 +39,22 @@ func (c *CephConnection) Matches(r *http.Request) bool {
 	return r.Method == "POST" && vars["cpool"] != "" && vars["coid"] != ""
 }
 
+func (c *CephConnection) writeToBlock(buf []byte) error {
+	fmt.Println("write to block path " + c.GetBlockPath())
+	return ioutil.WriteFile(c.GetBlockPath(), buf, 0644)
+}
+
 // Execute purpose of openning connection
 func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 	if !c.IsEnable() {
 		return NewError("ceph: service is not supported", Unsupported)
 	}
 	c.BindRequest(r)
+
+	if c.UseBlock {
+		return c.writeToBlock(buf)
+	}
+
 	if !c.OnContext() {
 		err := c.OpenContext()
 		if err != nil {

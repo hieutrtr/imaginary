@@ -10,8 +10,10 @@ type Connector interface {
 }
 
 type ConnectionConfig struct {
-	EnableCeph bool
-	CephConfig string
+	EnableCeph   bool
+	CephConfig   string
+	UseCephBlock bool
+	CephBlockURL string
 }
 
 var connectionMap = make(map[ConnectionType]Connection)
@@ -35,8 +37,10 @@ func RegisterConnection(connType ConnectionType, factory ConnectionFactoryFuncti
 func LoadConnections(o ServerOptions) {
 	for name, factory := range connectionFactoryMap {
 		connectionMap[name] = factory(&ConnectionConfig{
-			EnableCeph: o.EnableCeph,
-			CephConfig: o.CephConfig,
+			EnableCeph:   o.EnableCeph,
+			CephConfig:   o.CephConfig,
+			UseCephBlock: o.UseCephBlock,
+			CephBlockURL: o.CephBlockURL,
 		})
 	}
 }
