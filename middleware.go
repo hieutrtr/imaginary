@@ -63,7 +63,7 @@ func Middleware(fn func(http.ResponseWriter, *http.Request), o ServerOptions) ht
 
 func checkSafeKey(next http.Handler, o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !IsUpload(r) { // Upload request dont need checking hash key
+		if !IsUpload(r) && !IsPublic(r) { // Upload request dont need checking hash key
 			vars := gorilla.Vars(r)
 			safeHash := vars["safehash"]
 			route := strings.Replace(r.URL.RequestURI(), "/"+safeHash, "", 1)

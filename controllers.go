@@ -73,6 +73,13 @@ func IsUpload(r *http.Request) bool {
 	return false
 }
 
+// IsPublic check if request is for uploading an image
+func IsPublic(r *http.Request) bool {
+	if r.Method == "GET" && strings.HasPrefix(r.URL.RequestURI(), "/health") {
+		return true
+	}
+	return false
+}
 func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) {
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
