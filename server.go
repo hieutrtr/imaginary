@@ -81,13 +81,17 @@ func join(o ServerOptions, route string) string {
 	return path.Join(o.PathPrefix, route)
 }
 
+func joinPublic(o ServerOptions, route string) string {
+	return path.Join("/public", route)
+}
+
 // NewServerMux creates a new HTTP server route multiplexer.
 func NewServerMux(o ServerOptions) http.Handler {
 	// mux := http.NewServeMux()
 	mux := gorilla.NewRouter()
-	mux.Handle(join(o, "/"), Middleware(indexController, o))
-	mux.Handle(join(o, "/form"), Middleware(formController, o))
-	mux.Handle(join(o, "/health"), Middleware(healthController, o))
+	mux.Handle(joinPublic(o, "/"), Middleware(indexController, o))
+	mux.Handle(joinPublic(o, "/form"), Middleware(formController, o))
+	mux.Handle(joinPublic(o, "/health"), Middleware(healthController, o))
 
 	image := ImageMiddleware(o)
 	mux.Handle(join(o, "/upload/{cpool}/{coid}"), image(Info))
