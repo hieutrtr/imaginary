@@ -75,7 +75,7 @@ func IsUpload(r *http.Request) bool {
 
 // IsPublic check if request is for uploading an image
 func IsPublic(r *http.Request) bool {
-	if r.Method == "GET" && strings.HasPrefix(r.URL.RequestURI(), "/health") {
+	if r.Method == "GET" && strings.HasPrefix(r.URL.RequestURI(), "/public/") {
 		return true
 	}
 	return false
