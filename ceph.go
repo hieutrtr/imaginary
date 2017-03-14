@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/noahdesu/go-ceph/rados"
 
@@ -12,11 +13,13 @@ import (
 )
 
 const (
-	DATA           = "data"
-	WIDTH          = "width"
-	HEIGH          = "heigh"
-	SIZE           = "size"
-	IMAGE_MAX_BYTE = 5242880
+	DATA               = "data"
+	WIDTH              = "width"
+	HEIGH              = "heigh"
+	SIZE               = "size"
+	IMAGE_MAX_BYTE     = 5242880
+	CONNECTION_TIMEOUT = 10
+	CTX_TIMEOUT        = 2
 )
 
 // Ceph main struct of ceph
@@ -61,27 +64,50 @@ func (c *Ceph) IsEnable() bool {
 
 // SetData push data to ceph object
 func (c *Ceph) SetData(buf []byte) error {
-	if err := c.Context[c.Pool].SetXattr(c.OID, DATA, buf); err != nil {
-		return err
+	errSignal := make(chan error, 1)
+
+	go func() {
+		errSignal <- c.Context[c.Pool].SetXattr(c.OID, DATA, buf)
+	}()
+
+	select {
+	case <-time.After(time.Second * CTX_TIMEOUT):
+		return NewError("Ceph Connection Timeout", 1)
+	case err := <-errSignal:
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil
 }
 
 // GetData fetch object attribute DATA from ceph
 func (c *Ceph) GetData() ([]byte, error) {
+	errSignal := make(chan error, 1)
+	lengSignal := make(chan int, 1)
 	data := make([]byte, IMAGE_MAX_BYTE)
-	leng, err := c.Context[c.Pool].GetXattr(c.OID, DATA, data)
-	if err != nil {
-		return nil, NewError("Data is not exists", NotFound)
-	}
-	// Remove any NULL characters from buffer
-	if data == nil {
-		return nil, NewError("Data is not exists", NotFound)
-	}
+	go func() {
+		leng, err := c.Context[c.Pool].GetXattr(c.OID, DATA, data)
+		if err != nil {
+			errSignal <- NewError("Data is not exists", NotFound)
+		}
+		// Remove any NULL characters from buffer
+		if data == nil {
+			errSignal <- NewError("Data is not exists", NotFound)
+		}
+		lengSignal <- leng
+	}()
 
-	buf := bytes.NewBuffer(make([]byte, 0, leng+1))
-	io.Copy(buf, bytes.NewReader(data[:leng]))
-	return buf.Bytes(), nil
+	select {
+	case <-time.After(time.Second * CTX_TIMEOUT):
+		return nil, NewError("Ceph Connection Timeout", 1)
+	case err := <-errSignal:
+		return nil, err
+	case leng := <-lengSignal:
+		buf := bytes.NewBuffer(make([]byte, 0, leng+1))
+		io.Copy(buf, bytes.NewReader(data[:leng]))
+		return buf.Bytes(), nil
+	}
 }
 
 // DestroyContext when finish ceph jobs

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -28,8 +27,11 @@ func NewCephConnection(config *ConnectionConfig) Connection {
 			},
 		},
 	}
-	if config.EnableCeph {
-		MakeConnection(cc)
+	if config.EnableCeph && !config.UseCephBlock {
+		err := MakeConnection(cc)
+		if err != nil {
+			exitWithError("Ceph connection was fail with config: %s", config.CephConfig)
+		}
 	}
 	return cc
 }
@@ -40,7 +42,6 @@ func (c *CephConnection) Matches(r *http.Request) bool {
 }
 
 func (c *CephConnection) writeToBlock(buf []byte) error {
-	fmt.Println("write to block path " + c.GetBlockPath())
 	return ioutil.WriteFile(c.GetBlockPath(), buf, 0644)
 }
 

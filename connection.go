@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 type ConnectionType string
 type ConnectionFactoryFunction func(*ConnectionConfig) Connection
@@ -24,9 +27,21 @@ type Connection interface {
 	Execute(*http.Request, []byte) error
 }
 
-func MakeConnection(conn Connector) {
-	if err := conn.Connect(); err != nil {
-		exitWithError("connection fail: %s", err)
+func MakeConnection(conn Connector) error {
+	connSignal := make(chan error, 1)
+
+	go func() {
+		connSignal <- conn.Connect()
+	}()
+
+	select {
+	case <-time.After(time.Second * CONNECTION_TIMEOUT):
+		return NewError("Connection Timeout", 1)
+	case err := <-connSignal:
+		if err != nil {
+			return NewError("Connection fail", 1)
+		}
+		return nil
 	}
 }
 
@@ -47,7 +62,7 @@ func LoadConnections(o ServerOptions) {
 
 func MatchConnection(req *http.Request) Connection {
 	for _, conn := range connectionMap {
-		if conn.Matches(req) {
+		if conn != nil && conn.Matches(req) {
 			return conn
 		}
 	}

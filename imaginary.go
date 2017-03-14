@@ -106,14 +106,17 @@ Options:
 	-concurrency <num>         Throttle concurrency limit per second [default: disabled]
   -burst <num>              Throttle burst max cache size [default: 100]
   -mrelease <num>           OS memory release interval in seconds [default: 30]
-  -cpus <num>               Number of used cpu cores.
-                            (default for current machine is %d cores)
+  -cpus <num>               Number of used cpu cores. (default for current machine is %d cores)
 	-enable-ceph              enable ceph integration
 	-ceph-config              path to ceph config
 	-enable-friendly					enable friendly url by services
 	-enable-safe-route				enable safe route url
 	-safe-key									secret key to hash URI that is used with enable-safe-route
 	-enable-tracking 					tracking event
+
+Environments:
+	PORT (9000)
+	KAFKA_BROKERS (10.0.0.1:9092,10.0.0.2:9092)
 `
 
 func main() {

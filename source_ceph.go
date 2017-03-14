@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -28,8 +27,11 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 			},
 		},
 	}
-	if config.EnableCeph {
-		MakeConnection(cis)
+	if config.EnableCeph && !config.UseCephBlock {
+		err := MakeConnection(cis)
+		if err != nil {
+			exitWithError("Ceph connection was fail with config: %s", config.CephConfig)
+		}
 	}
 	return cis
 }
@@ -52,7 +54,6 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 }
 
 func (s *CephImageSource) readFromBlock() ([]byte, error) {
-	fmt.Println("Using Ceph Block")
 	return ioutil.ReadFile(s.GetBlockPath())
 }
 
