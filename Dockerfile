@@ -43,7 +43,7 @@ RUN \
 
 # gcc for cgo
 RUN apt-get update && apt-get install -y \
-    pkg-config glib-2.0 gcc git libc6-dev make ca-certificates librados-dev \
+    curl pkg-config glib-2.0 gcc git libc6-dev make ca-certificates librados-dev \
     --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
