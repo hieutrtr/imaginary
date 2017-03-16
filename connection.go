@@ -27,6 +27,7 @@ type Connection interface {
 	Execute(*http.Request, []byte) error
 }
 
+// MakeConnection connect by handler of connection
 func MakeConnection(conn Connector) error {
 	connSignal := make(chan error, 1)
 
@@ -38,10 +39,7 @@ func MakeConnection(conn Connector) error {
 	case <-time.After(time.Second * CONNECTION_TIMEOUT):
 		return NewError("Connection Timeout", 1)
 	case err := <-connSignal:
-		if err != nil {
-			return NewError("Connection fail", 1)
-		}
-		return nil
+		return err
 	}
 }
 

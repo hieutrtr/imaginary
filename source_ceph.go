@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -30,7 +31,7 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 	if config.EnableCeph && !config.UseCephBlock {
 		err := MakeConnection(cis)
 		if err != nil {
-			exitWithError("Ceph connection was fail with config: %s", config.CephConfig)
+			exitWithError("Ceph connection was fail %s with config: %s", fmt.Sprint(err), config.CephConfig)
 		}
 	}
 	return cis

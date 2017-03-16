@@ -19,7 +19,7 @@ const (
 	SIZE               = "size"
 	IMAGE_MAX_BYTE     = 5242880
 	CONNECTION_TIMEOUT = 10
-	CTX_TIMEOUT        = 2
+	CTX_TIMEOUT        = 5
 )
 
 // Ceph main struct of ceph
@@ -146,10 +146,5 @@ func (c *Ceph) Connect() error {
 	if err != nil {
 		return NewError("ceph: fail to read config "+c.ConfigPath, NotFound)
 	}
-	err = c.Connection.Connect()
-	if err != nil {
-		return NewError("ceph: fail to connect with config "+c.ConfigPath, NotFound)
-	}
-	return nil
-
+	return c.Connection.Connect()
 }
