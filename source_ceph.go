@@ -18,23 +18,24 @@ type CephImageSource struct {
 
 // NewCephImageSource create new ceph image source
 func NewCephImageSource(config *SourceConfig) ImageSource {
-	cis := &CephImageSource{
-		Ceph: Ceph{
-			CephConfig: CephConfig{
-				ConfigPath: config.CephConfig,
-				Enable:     config.EnableCeph,
-				UseBlock:   config.UseCephBlock,
-				BlockURL:   config.CephBlockURL,
-			},
-		},
-	}
 	if config.EnableCeph && !config.UseCephBlock {
+		cis := &CephImageSource{
+			Ceph: Ceph{
+				CephConfig: CephConfig{
+					ConfigPath: config.CephConfig,
+					Enable:     config.EnableCeph,
+					UseBlock:   config.UseCephBlock,
+					BlockURL:   config.CephBlockURL,
+				},
+			},
+		}
 		err := MakeConnection(cis)
 		if err != nil {
 			exitWithError("Ceph connection was fail %s with config: %s", fmt.Sprint(err), config.CephConfig)
 		}
+		return cis
 	}
-	return cis
+	return nil
 }
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
