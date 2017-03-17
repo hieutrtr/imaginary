@@ -60,6 +60,7 @@ var (
 	aEnableTracking    = flag.Bool("enable-tracking", false, "Enable tracking event")
 	aUseCephBlock      = flag.Bool("use-ceph-block", false, "Use ceph block")
 	aCephBlockUrl      = flag.String("ceph-block-url", "", "Ceph block base dir")
+	aEnableS3          = flag.Bool("enable-s3", false, "Enable S3 client")
 )
 
 const usage = `imaginary %s
@@ -168,6 +169,14 @@ func main() {
 		EnableTracking:    *aEnableTracking,
 		UseCephBlock:      *aUseCephBlock,
 		CephBlockURL:      *aCephBlockUrl,
+		EnableS3:          *aEnableS3,
+	}
+
+	if *aEnableS3 {
+		if *aEnableCeph {
+			exitWithError("Ceph and S3 should not use at the same time")
+		}
+		S3Ready()
 	}
 
 	// Create a memory release goroutine
