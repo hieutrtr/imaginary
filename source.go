@@ -19,6 +19,7 @@ type SourceConfig struct {
 	CephConfig      string
 	UseCephBlock    bool
 	CephBlockURL    string
+	EnableS3        bool
 }
 
 var imageSourceMap = make(map[ImageSourceType]ImageSource)
@@ -46,6 +47,7 @@ func LoadSources(o ServerOptions) {
 			CephConfig:      o.CephConfig,
 			UseCephBlock:    o.UseCephBlock,
 			CephBlockURL:    o.CephBlockURL,
+			EnableS3:        o.EnableS3,
 		})
 	}
 }
