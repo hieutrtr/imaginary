@@ -72,7 +72,7 @@ func joinImageRoute(o ServerOptions, route string) string {
 	if o.EnableSafeRoute {
 		middleRoute = "/{safehash}"
 	}
-	if o.EnableCeph {
+	if o.EnableCeph || o.EnableS3 {
 		middleRoute = middleRoute + "/{service}/{oid}"
 	}
 	return path.Join(o.PathPrefix, middleRoute, route)
