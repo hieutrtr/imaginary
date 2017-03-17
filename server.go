@@ -42,6 +42,7 @@ type ServerOptions struct {
 	EnableTracking    bool
 	UseCephBlock      bool
 	CephBlockURL      string
+	EnableS3          bool
 }
 
 func Server(o ServerOptions) error {
@@ -72,7 +73,7 @@ func joinImageRoute(o ServerOptions, route string) string {
 		middleRoute = "/{safehash}"
 	}
 	if o.EnableCeph {
-		middleRoute = middleRoute + "/{cpool}/{coid}"
+		middleRoute = middleRoute + "/{service}/{oid}"
 	}
 	return path.Join(o.PathPrefix, middleRoute, route)
 }
@@ -94,7 +95,7 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(joinPublic(o, "/health"), Middleware(healthController, o))
 
 	image := ImageMiddleware(o)
-	mux.Handle(join(o, "/upload/{cpool}/{coid}"), image(Info))
+	mux.Handle(join(o, "/upload/{service}/{oid}"), image(Info))
 	mux.Handle(joinImageRoute(o, "/"), image(Origin))
 	mux.Handle(joinImageRoute(o, "/resize"), image(Resize))
 	mux.Handle(joinImageRoute(o, "/enlarge"), image(Enlarge))

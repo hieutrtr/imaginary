@@ -26,8 +26,8 @@ func TrackingUploadEvent(next http.Handler, o ServerOptions) http.Handler {
 		if IsUpload(r) {
 			vars := gorilla.Vars(r)
 			e := &kafka.UploadEvent{
-				Topic: vars["cpool"],
-				Oid:   vars["coid"],
+				Topic: vars["service"],
+				Oid:   vars["oid"],
 			}
 			kafka.Produce(e)
 		}

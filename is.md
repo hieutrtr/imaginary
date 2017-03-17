@@ -26,35 +26,19 @@ lled `file` with the raw image data in order to be processed properly by imagina
 Accepts: `multipart/form-data`
 Support: `--data-binary` - Directly POST raw image data
 
-#### Allowed params
-- cpool `string` `required` - Pool (Ceph concept) or Namespace of service
-- coid `string` `required` - Image ID
+#### Allowed variables
+- service `string` `required` - Pool (Ceph concept) or Bucket (S3 concept)
+- oid `string` `required` - Image ID
 
-### Fetching Image Through Varnish
-
-#### Varnish Config
-GET /property_project/{id} -> GET /resize?width=600&height=460&cpool=property_project&coid={id}
-GET /property_project_thumb/{id} -> GET /thumbnail?width=100&cpool=property_project&coid={id}
-
-####  `GET /<service>_<action>/<img_id>`
+####  `GET <hash_key>/<service>/<oid>/<action>/`
 
 EX:
 ```
-GET /profile/190790 - Full size for profile picture
-GET /property_project_thumb/190790 - Thumbnail image
-GET /ads_wm/190790 - Watermark image
+GET /6e3df04527daf6a25989aa9345b47bc7d644ea18/property_project/1245 - Full size for profile picture
+GET /6e3df04527daf6a25989aa9345b47bc7d644ea18/property_project/1245/thumbnail?width=100 - Thumbnail image
 ```
 
 ### Fetching Image Directly
-
-#### Ceph prefix
-If Ceph is enabled
-required  - `/{cpool}/{coid}`
-
-- cpool `string` - Specific Ceph Pool (for every service)
-- coid `string` - Specific object id of the Pool of
-
-Example : `/{cpool}/{coid}/resize?width=600&height=400`
 
 #### GET | POST /info
 Accepts: `image/*, multipart/form-data`. Content-Type: `application/json`

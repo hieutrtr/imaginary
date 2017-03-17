@@ -18,28 +18,29 @@ type CephConnection struct {
 
 // NewCephConnection create new ceph connection
 func NewCephConnection(config *ConnectionConfig) Connection {
-	cc := &CephConnection{
-		Ceph: Ceph{
-			CephConfig: CephConfig{
-				ConfigPath: config.CephConfig,
-				Enable:     config.EnableCeph,
-				UseBlock:   config.UseCephBlock,
-				BlockURL:   config.CephBlockURL,
-			},
-		},
-	}
 	if config.EnableCeph && !config.UseCephBlock {
+		cc := &CephConnection{
+			Ceph: Ceph{
+				CephConfig: CephConfig{
+					ConfigPath: config.CephConfig,
+					Enable:     config.EnableCeph,
+					UseBlock:   config.UseCephBlock,
+					BlockURL:   config.CephBlockURL,
+				},
+			},
+		}
 		err := MakeConnection(cc)
 		if err != nil {
 			exitWithError("Ceph connection was fail %s with config: %s", fmt.Sprint(err), config.CephConfig)
 		}
+		return cc
 	}
-	return cc
+	return nil
 }
 
 func (c *CephConnection) Matches(r *http.Request) bool {
 	vars := gorilla.Vars(r)
-	return r.Method == "POST" && vars["cpool"] != "" && vars["coid"] != ""
+	return r.Method == "POST" && vars["service"] != "" && vars["oid"] != ""
 }
 
 func (c *CephConnection) writeToBlock(buf []byte) error {

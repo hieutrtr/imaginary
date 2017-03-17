@@ -39,7 +39,7 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
 	vars := gorilla.Vars(r)
-	return r.Method == "GET" && vars["cpool"] != "" && vars["coid"] != ""
+	return r.Method == "GET" && vars["service"] != "" && vars["oid"] != ""
 }
 
 // GetImage from ceph

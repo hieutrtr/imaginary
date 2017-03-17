@@ -133,8 +133,8 @@ func (c *Ceph) OpenContext() error {
 func (c *Ceph) BindRequest(req *http.Request) {
 	vars := gorilla.Vars(req)
 	c.CephObject = CephObject{
-		Pool: vars["cpool"],
-		OID:  vars["coid"],
+		Pool: vars["service"],
+		OID:  vars["oid"],
 	}
 }
 
