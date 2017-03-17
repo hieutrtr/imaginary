@@ -13,6 +13,7 @@ type Connector interface {
 }
 
 type ConnectionConfig struct {
+	EnableS3     bool
 	EnableCeph   bool
 	CephConfig   string
 	UseCephBlock bool
@@ -50,6 +51,7 @@ func RegisterConnection(connType ConnectionType, factory ConnectionFactoryFuncti
 func LoadConnections(o ServerOptions) {
 	for name, factory := range connectionFactoryMap {
 		connectionMap[name] = factory(&ConnectionConfig{
+			EnableS3:     o.EnableS3,
 			EnableCeph:   o.EnableCeph,
 			CephConfig:   o.CephConfig,
 			UseCephBlock: o.UseCephBlock,
