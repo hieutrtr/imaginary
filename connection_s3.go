@@ -18,8 +18,6 @@ type S3Connection struct {
 // NewS3Connection create new ceph connection
 func NewS3Connection(config *ConnectionConfig) Connection {
 	if config.EnableS3 {
-		fmt.Println("S3config")
-		fmt.Println(config)
 		cc := &S3Connection{}
 		err := MakeConnection(cc)
 		if err != nil {
