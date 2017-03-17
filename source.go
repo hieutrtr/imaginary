@@ -54,7 +54,7 @@ func LoadSources(o ServerOptions) {
 
 func MatchSource(req *http.Request) ImageSource {
 	for _, source := range imageSourceMap {
-		if source.Matches(req) {
+		if source != nil && source.Matches(req) {
 			return source
 		}
 	}
