@@ -20,7 +20,6 @@ dockerize:
   - docker build -t docker.chotot.org/$DIST_NAME:$VERSION .
   - docker push docker.chotot.org/$DIST_NAME:$VERSION
   tags:
-  - shell
   - docker
 
 clean:docker:
@@ -29,5 +28,4 @@ clean:docker:
   - docker images
   - docker rmi -f docker.chotot.org/$DIST_NAME:$VERSION
   tags:
-  - shell
   - docker
