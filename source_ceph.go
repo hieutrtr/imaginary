@@ -66,7 +66,7 @@ func (s *CephImageSource) fetchObject() ([]byte, error) {
 			return nil, err
 		}
 	}
-	return s.GetData()
+	return s.GetAttr()
 }
 
 func init() {

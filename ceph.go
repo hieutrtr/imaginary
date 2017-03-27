@@ -42,6 +42,7 @@ type CephConfig struct {
 type CephObject struct {
 	Pool string
 	OID  string
+	Attr string
 }
 
 // GetBlockPath build block storage path
@@ -62,12 +63,15 @@ func (c *Ceph) IsEnable() bool {
 	return c.Enable
 }
 
-// SetData push data to ceph object
-func (c *Ceph) SetData(buf []byte) error {
+// SetAttr push attribute to ceph object
+func (c *Ceph) SetAttr(buf []byte) error {
 	errSignal := make(chan error, 1)
 
 	go func() {
-		errSignal <- c.Context[c.Pool].SetXattr(c.OID, DATA, buf)
+		if c.Attr == "" {
+			c.Attr = DATA
+		}
+		errSignal <- c.Context[c.Pool].SetXattr(c.OID, c.Attr, buf)
 	}()
 
 	select {
@@ -81,13 +85,16 @@ func (c *Ceph) SetData(buf []byte) error {
 	}
 }
 
-// GetData fetch object attribute DATA from ceph
-func (c *Ceph) GetData() ([]byte, error) {
+// GetAttr fetch object attribute DATA from ceph
+func (c *Ceph) GetAttr() ([]byte, error) {
 	errSignal := make(chan error, 1)
 	lengSignal := make(chan int, 1)
 	data := make([]byte, IMAGE_MAX_BYTE)
 	go func() {
-		leng, err := c.Context[c.Pool].GetXattr(c.OID, DATA, data)
+		if c.Attr == "" {
+			c.Attr = DATA
+		}
+		leng, err := c.Context[c.Pool].GetXattr(c.OID, c.Attr, data)
 		if err != nil {
 			errSignal <- NewError("Data is not exists", NotFound)
 		}
@@ -135,6 +142,15 @@ func (c *Ceph) BindRequest(req *http.Request) {
 	c.CephObject = CephObject{
 		Pool: vars["service"],
 		OID:  vars["oid"],
+	}
+}
+
+// BindObject Initialize CephObject to get ceph object by attribute
+func (c *Ceph) BindObject(vars map[string]string) {
+	c.CephObject = CephObject{
+		Pool: vars["service"],
+		OID:  vars["oid"],
+		Attr: vars["attr"],
 	}
 }
 

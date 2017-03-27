@@ -64,7 +64,7 @@ func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 			return err
 		}
 	}
-	return c.SetData(buf)
+	return c.SetAttr(buf)
 }
 
 func init() {
