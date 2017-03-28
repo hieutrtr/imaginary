@@ -18,7 +18,7 @@ const (
 	WIDTH              = "width"
 	HEIGH              = "heigh"
 	SIZE               = "size"
-	IMAGE_MAX_BYTE     = 5242880
+	IMAGE_MAX_BYTE     = 20971520
 	CONNECTION_TIMEOUT = 10
 	CTX_TIMEOUT        = 5
 )
