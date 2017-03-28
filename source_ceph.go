@@ -52,7 +52,17 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if s.UseBlock {
 		return s.readFromBlock()
 	}
-	return s.fetchObject()
+	fmt.Println(s.Attr)
+	buf, err := s.fetchObject()
+	if s.Attr != DATA {
+		if buf == nil {
+			s.Attr = DATA
+			buf, err = s.fetchObject()
+		} else {
+			req.Header.Set("cached", s.Attr)
+		}
+	}
+	return buf, err
 }
 
 func (s *CephImageSource) readFromBlock() ([]byte, error) {

@@ -60,7 +60,10 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				return
 			}
 		}
-
+		if req.Header.Get("cached") != "" {
+			operation = Origin
+		}
+		fmt.Println(req.Header.Get("cached"))
 		imageHandler(w, req, buf, operation, o)
 	}
 }

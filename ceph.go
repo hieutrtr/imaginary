@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/noahdesu/go-ceph/rados"
@@ -21,6 +22,11 @@ const (
 	CONNECTION_TIMEOUT = 10
 	CTX_TIMEOUT        = 5
 )
+
+var cephAttributes = []string{
+	"thumbnail",
+	"watermark",
+}
 
 // Ceph main struct of ceph
 type Ceph struct {
@@ -142,7 +148,21 @@ func (c *Ceph) BindRequest(req *http.Request) {
 	c.CephObject = CephObject{
 		Pool: vars["service"],
 		OID:  vars["oid"],
+		Attr: getCacheAttr(req.URL.Path),
 	}
+}
+
+func getCacheAttr(url string) string {
+	parts := strings.Split(url, "/")
+
+	if parts[1] != "upload" {
+		for _, a := range cephAttributes {
+			if a == parts[len(parts)-1] {
+				return a
+			}
+		}
+	}
+	return DATA
 }
 
 // BindObject Initialize CephObject to get ceph object by attribute
