@@ -35,10 +35,10 @@ func TrackingUploadEvent(next http.Handler, o ServerOptions) http.Handler {
 				log.Println("Creating kafka producer was fail on error", err.Error())
 			}
 			e := &imgevent.UploadEvent{
-				Topic: vars["service"],
+				Topic: "imaginary-upload-" + vars["service"],
 				ImgID: vars["oid"],
 			}
-			err := producer.Produce(e)
+			err = producer.Produce(e)
 			if err != nil {
 				log.Println("Producing event to kafka was fail on error", err.Error())
 			}
