@@ -5,31 +5,43 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/hieutrtr/imaginary/kafka"
-
 	"github.com/daaku/go.httpgzip"
 	gorilla "github.com/gorilla/mux"
+	"github.com/hieutrtr/imgevent"
 	"github.com/rs/cors"
 	"gopkg.in/h2non/bimg.v1"
 	"gopkg.in/throttled/throttled.v2"
 	"gopkg.in/throttled/throttled.v2/store/memstore"
 )
 
+var producer *imgevent.Producer
+
 // TrackingUploadEvent is mean pushing upload image event to Kafka
 func TrackingUploadEvent(next http.Handler, o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
 		if IsUpload(r) {
+			var err error
 			vars := gorilla.Vars(r)
-			e := &kafka.UploadEvent{
-				Topic: vars["service"],
-				Oid:   vars["oid"],
+			if producer == nil {
+				producer, err = imgevent.NewProducer()
 			}
-			kafka.Produce(e)
+			if err != nil {
+				log.Println("Creating kafka producer was fail on error", err.Error())
+			}
+			e := &imgevent.UploadEvent{
+				Topic: vars["service"],
+				ImgID: vars["oid"],
+			}
+			err := producer.Produce(e)
+			if err != nil {
+				log.Println("Producing event to kafka was fail on error", err.Error())
+			}
 		}
 	})
 }
