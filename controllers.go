@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -65,6 +66,11 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 		}
 		if modtime := req.Header.Get("last-modified"); modtime != "" {
 			w.Header().Set("last-modified", modtime)
+			h := sha256.New()
+			h.Write([]byte(modtime))
+			if etag := fmt.Sprintf("%x", h.Sum(nil)); etag != "" {
+				w.Header().Set("Etag", etag)
+			}
 		}
 
 		imageHandler(w, req, buf, operation, o)
