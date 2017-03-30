@@ -63,7 +63,10 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 		if req.Header.Get("cached") != "" {
 			operation = Origin
 		}
-		fmt.Println(req.Header.Get("cached"))
+		if modtime := req.Header.Get("last-modified"); modtime != "" {
+			w.Header().Set("last-modified", modtime)
+		}
+
 		imageHandler(w, req, buf, operation, o)
 	}
 }

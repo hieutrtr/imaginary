@@ -62,6 +62,8 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 			req.Header.Set("cached", s.Attr)
 		}
 	}
+	stat, _ := s.GetStat()
+	req.Header.Set("last-modified", stat.ModTime.String())
 	return buf, err
 }
 
