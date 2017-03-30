@@ -51,7 +51,6 @@ var (
 	aCpus              = flag.Int("cpus", runtime.GOMAXPROCS(-1), "Number of cpu cores to use")
 	aEnableCeph        = flag.Bool("enable-ceph", false, "enable ceph integration")
 	aCephConf          = flag.String("ceph-conf", "/etc/ceph/ceph.conf", "path to ceph config")
-	aEnableFriendly    = flag.Bool("enable-friendly", false, "enable friendly by services")
 	aEnableSafeRoute   = flag.Bool("enable-safe-route", false, "enable safe route")
 	aSafeKey           = flag.String("safe-key", "", "secret key to hash URI that is used with enable-safe-route")
 	aCpuprofile        = flag.String("cpuprofile", "", "write cpu profile `file`")
@@ -110,7 +109,6 @@ Options:
   -cpus <num>               Number of used cpu cores. (default for current machine is %d cores)
 	-enable-ceph              enable ceph integration
 	-ceph-config              path to ceph config
-	-enable-friendly					enable friendly url by services
 	-enable-safe-route				enable safe route url
 	-safe-key									secret key to hash URI that is used with enable-safe-route
 	-enable-tracking 					tracking event
@@ -163,7 +161,6 @@ func main() {
 		MaxAllowedSize:    *aMaxAllowedSize,
 		EnableCeph:        *aEnableCeph,
 		CephConfig:        *aCephConf,
-		EnableFriendly:    *aEnableFriendly,
 		EnableSafeRoute:   *aEnableSafeRoute,
 		SafeKey:           *aSafeKey,
 		EnableTracking:    *aEnableTracking,

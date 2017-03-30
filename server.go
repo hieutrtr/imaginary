@@ -36,7 +36,6 @@ type ServerOptions struct {
 	MaxAllowedSize    int
 	EnableCeph        bool
 	CephConfig        string
-	EnableFriendly    bool
 	EnableSafeRoute   bool
 	SafeKey           string
 	EnableTracking    bool
@@ -110,6 +109,5 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(joinImageRoute(o, "/watermark"), image(Watermark))
 	mux.Handle(joinImageRoute(o, "/info"), image(Info))
 
-	mux.Handle("/friendly/{service}/{op}/{id}", FriendlyImageMiddleware(o))
 	return mux
 }

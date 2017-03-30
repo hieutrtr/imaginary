@@ -31,7 +31,6 @@ var (
 	ErrInvalidImageURL    = NewError("Invalid image URL", BadRequest)
 	ErrMissingImageSource = NewError("Cannot process the image from source due to missing or invalid params", BadRequest)
 	ErrMissingConnection  = NewError("Ceph connection issue", BadRequest)
-	ErrFriendlyNotAllowed = NewError("Friendly route is not enable", Unsupported)
 	ErrSafeHash           = NewError("Unsafe request", BadRequest)
 )
 
