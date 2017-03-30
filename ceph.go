@@ -51,6 +51,12 @@ type CephObject struct {
 	Attr string
 }
 
+// GetStat of object from ceph
+// TODO: Need improve with handling connection timeout
+func (c *Ceph) GetStat() (rados.ObjectStat, error) {
+	return c.Context[c.Pool].Stat(c.OID)
+}
+
 // GetBlockPath build block storage path
 func (c *Ceph) GetBlockPath() string {
 	return fmt.Sprintf("/%s/%s/%s", c.BlockURL, c.Pool, c.OID)

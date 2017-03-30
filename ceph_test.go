@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 )
 
@@ -35,7 +36,7 @@ func TestOpenContext(t *testing.T) {
 func TestBindRequest(t *testing.T) {
 	vars := map[string]string{
 		"service": "test",
-		"oid":     "testobj",
+		"oid":     "testobjstats",
 		"attr":    "thumb",
 	}
 	c.BindObject(vars)
@@ -64,5 +65,15 @@ func TestGetAttr(t *testing.T) {
 		if bytes.Compare(buf, imgTest) != 0 {
 			t.Fatal("Get Attr from object is different with original")
 		}
+	}
+}
+
+func TestGetStat(t *testing.T) {
+	if c.OnContext() {
+		stats, err := c.GetStat()
+		if err != nil {
+			t.Fatal("Getting Stats from ceph is fail on error", err.Error())
+		}
+		fmt.Println(stats.ModTime)
 	}
 }
