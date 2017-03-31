@@ -48,7 +48,10 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			return
 		}
 
-		if IsUpload(req) {
+		imageHandler(w, req, buf, operation, o)
+
+		if IsUpload(req) && checkSupportedMediaType(buf) {
+
 			var connection = MatchConnection(req)
 			if connection == nil {
 				ErrorReply(req, w, ErrMissingConnection, o)
@@ -61,19 +64,43 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				return
 			}
 		}
+
 		if req.Header.Get("cached") != "" {
 			operation = Origin
 		}
-		if modtime := req.Header.Get("last-modified"); modtime != "" {
-			w.Header().Set("last-modified", modtime)
-			h := sha256.New()
-			h.Write([]byte(modtime))
-			if etag := fmt.Sprintf("%x", h.Sum(nil)); etag != "" {
-				w.Header().Set("Etag", etag)
-			}
-		}
+		setResponseHeader(w, req)
+	}
+}
 
-		imageHandler(w, req, buf, operation, o)
+func checkSupportedMediaType(buf []byte) bool {
+	// Infer the body MIME type via mimesniff algorithm
+	mimeType := http.DetectContentType(buf)
+	fmt.Println("mimeType", mimeType)
+	// If cannot infer the type, infer it via magic numbers
+	if mimeType == "application/octet-stream" {
+		kind, err := filetype.Get(buf)
+		if err == nil && kind.MIME.Value != "" {
+			mimeType = kind.MIME.Value
+		}
+	}
+
+	// Infer text/plain responses as potential SVG image
+	if strings.Contains(mimeType, "text/plain") && len(buf) > 8 {
+		if bimg.IsSVGImage(buf) {
+			mimeType = "image/svg+xml"
+		}
+	}
+	return IsImageMimeTypeSupported(mimeType)
+}
+
+func setResponseHeader(w http.ResponseWriter, req *http.Request) {
+	if modtime := req.Header.Get("last-modified"); modtime != "" {
+		w.Header().Set("last-modified", modtime)
+		h := sha256.New()
+		h.Write([]byte(modtime))
+		if etag := fmt.Sprintf("%x", h.Sum(nil)); etag != "" {
+			w.Header().Set("Etag", etag)
+		}
 	}
 }
 
@@ -95,7 +122,7 @@ func IsPublic(r *http.Request) bool {
 func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) {
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
-
+	fmt.Println("mimeType", mimeType)
 	// If cannot infer the type, infer it via magic numbers
 	if mimeType == "application/octet-stream" {
 		kind, err := filetype.Get(buf)
@@ -110,7 +137,6 @@ func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation 
 			mimeType = "image/svg+xml"
 		}
 	}
-
 	// Finally check if image MIME type is supported
 	if IsImageMimeTypeSupported(mimeType) == false {
 		ErrorReply(r, w, ErrUnsupportedMedia, o)
