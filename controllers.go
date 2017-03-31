@@ -48,6 +48,11 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			return
 		}
 
+		setResponseHeader(w, req)
+
+		// if req.Header.Get("cached") != "" {
+		// 	operation = Origin
+		// }
 		imageHandler(w, req, buf, operation, o)
 
 		if IsUpload(req) && checkSupportedMediaType(buf) {
@@ -64,11 +69,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				return
 			}
 		}
-
-		if req.Header.Get("cached") != "" {
-			operation = Origin
-		}
-		setResponseHeader(w, req)
 	}
 }
 
