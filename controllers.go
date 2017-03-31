@@ -75,7 +75,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 func checkSupportedMediaType(buf []byte) bool {
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
-	fmt.Println("mimeType", mimeType)
 	// If cannot infer the type, infer it via magic numbers
 	if mimeType == "application/octet-stream" {
 		kind, err := filetype.Get(buf)
@@ -122,7 +121,6 @@ func IsPublic(r *http.Request) bool {
 func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) {
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
-	fmt.Println("mimeType", mimeType)
 	// If cannot infer the type, infer it via magic numbers
 	if mimeType == "application/octet-stream" {
 		kind, err := filetype.Get(buf)
