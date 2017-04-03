@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -75,5 +76,14 @@ func TestGetStat(t *testing.T) {
 			t.Fatal("Getting Stats from ceph is fail on error", err.Error())
 		}
 		fmt.Println(stats.ModTime)
+	}
+}
+
+func TestGetCachedAttr(t *testing.T) {
+	url := "http://imaginaryct.com/7d6e3468f88cccbde9e94062650d632786dd54ea/ads/123/thumbnail?width=100"
+	req := httptest.NewRequest("GET", url, nil)
+	attr := getCacheAttr(req)
+	if attr != "thumbnail_width=100" {
+		t.Fatal("fail to get attr for caching", attr)
 	}
 }

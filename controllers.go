@@ -29,6 +29,32 @@ func healthController(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
+func UploadImage(req *http.Request, buf []byte) (error, int) {
+	var connection = MatchConnection(req)
+	if connection == nil {
+		return ErrMissingConnection, ErrMissingConnection.HTTPCode()
+	}
+
+	err := connection.Execute(req, buf)
+	if err != nil {
+		e := NewError(err.Error(), BadRequest)
+		return e, e.HTTPCode()
+	}
+	return nil, 0
+}
+
+func UploadOrCache(req *http.Request, buf []byte) string {
+	fmt.Println("UploadOrCache", req.Header.Get("cached"))
+	if IsUploadRequest(req) && checkSupportedMediaType(buf) {
+		fmt.Println("upload")
+		return "upload"
+	} else if !IsUploadRequest(req) && checkSupportedMediaType(buf) && req.Header.Get("cached") == "" {
+		fmt.Println("cache")
+		return "cache"
+	}
+	return ""
+}
+
 func imageController(o ServerOptions, operation Operation) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var imageSource = MatchSource(req)
@@ -48,26 +74,26 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			return
 		}
 
+		if req.Header.Get("cached") != "" {
+			operation = Origin
+		}
 		setResponseHeader(w, req)
+		uploadedBuf := imageHandler(w, req, buf, operation, o)
+		if uploadedBuf != nil {
+			buf = uploadedBuf
+		}
 
-		// if req.Header.Get("cached") != "" {
-		// 	operation = Origin
-		// }
-		imageHandler(w, req, buf, operation, o)
+		var code int
+		switch UploadOrCache(req, buf) {
+		case "upload":
+			err, code = UploadImage(req, buf)
+		case "cache":
+			req.Method = "POST"
+			err, code = UploadImage(req, buf)
+		}
 
-		if IsUpload(req) && checkSupportedMediaType(buf) {
-
-			var connection = MatchConnection(req)
-			if connection == nil {
-				ErrorReply(req, w, ErrMissingConnection, o)
-				return
-			}
-
-			err = connection.Execute(req, buf)
-			if err != nil {
-				ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
-				return
-			}
+		if err != nil {
+			ErrorReply(req, w, NewError(err.Error(), uint8(code)), o)
 		}
 	}
 }
@@ -103,8 +129,8 @@ func setResponseHeader(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// IsUpload check if request is for uploading an image
-func IsUpload(r *http.Request) bool {
+// IsUploadRequest check if request is for uploading an image
+func IsUploadRequest(r *http.Request) bool {
 	if r.Method == "POST" && strings.HasPrefix(r.URL.RequestURI(), "/upload/") {
 		return true
 	}
@@ -118,7 +144,12 @@ func IsPublic(r *http.Request) bool {
 	}
 	return false
 }
-func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) {
+
+func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) []byte {
+
+	if r.Header.Get("cached") != "" {
+		Operation = Origin
+	}
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
 	// If cannot infer the type, infer it via magic numbers
@@ -138,23 +169,26 @@ func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation 
 	// Finally check if image MIME type is supported
 	if IsImageMimeTypeSupported(mimeType) == false {
 		ErrorReply(r, w, ErrUnsupportedMedia, o)
-		return
+		return nil
 	}
 
 	opts := readParams(r.URL.Query())
 	if opts.Type != "" && ImageType(opts.Type) == 0 {
 		ErrorReply(r, w, ErrOutputFormat, o)
-		return
+		return nil
 	}
 
 	image, err := Operation.Run(buf, opts)
 	if err != nil {
 		ErrorReply(r, w, NewError("Error while processing the image: "+err.Error(), BadRequest), o)
-		return
+		return nil
 	}
-
 	w.Header().Set("Content-Type", image.Mime)
 	w.Write(image.Body)
+	if image.Mime != "application/json" {
+		return image.Body
+	}
+	return nil
 }
 
 func formController(w http.ResponseWriter, r *http.Request) {

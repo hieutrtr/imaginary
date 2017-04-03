@@ -25,7 +25,7 @@ var producer *imgevent.Producer
 func TrackingUploadEvent(next http.Handler, o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
-		if IsUpload(r) {
+		if IsUploadRequest(r) {
 			var err error
 			vars := gorilla.Vars(r)
 			if producer == nil {
@@ -75,7 +75,7 @@ func Middleware(fn func(http.ResponseWriter, *http.Request), o ServerOptions) ht
 
 func checkSafeKey(next http.Handler, o ServerOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !IsUpload(r) && !IsPublic(r) { // Upload request dont need checking hash key
+		if !IsUploadRequest(r) && !IsPublic(r) { // Upload request dont need checking hash key
 			vars := gorilla.Vars(r)
 			safeHash := vars["safehash"]
 			route := strings.Replace(r.URL.RequestURI(), "/"+safeHash, "", 1)

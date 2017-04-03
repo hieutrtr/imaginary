@@ -78,7 +78,7 @@ func (c *Ceph) IsEnable() bool {
 // SetAttr push attribute to ceph object
 func (c *Ceph) SetAttr(buf []byte) error {
 	errSignal := make(chan error, 1)
-
+	fmt.Println("SetAtr", c.Attr)
 	go func() {
 		if c.Attr == "" {
 			c.Attr = DATA
@@ -151,20 +151,23 @@ func (c *Ceph) OpenContext() error {
 // BindRequest Initialize CephObject need to get ceph object
 func (c *Ceph) BindRequest(req *http.Request) {
 	vars := gorilla.Vars(req)
+	attr := getCacheAttr(req)
 	c.CephObject = CephObject{
 		Pool: vars["service"],
 		OID:  vars["oid"],
-		Attr: getCacheAttr(req.URL.Path),
+		Attr: attr,
 	}
 }
 
-func getCacheAttr(url string) string {
-	parts := strings.Split(url, "/")
+func getCacheAttr(req *http.Request) string {
+	parts := strings.Split(req.URL.Path, "/")
 
 	if parts[1] != "upload" {
 		for _, a := range cephAttributes {
 			if a == parts[len(parts)-1] {
-				return a
+				attr := fmt.Sprintf("%s_%s", a, req.URL.RawQuery)
+				fmt.Println("getCacheAttr", attr)
+				return attr
 			}
 		}
 	}
