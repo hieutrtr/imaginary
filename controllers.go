@@ -43,11 +43,17 @@ func UploadImage(req *http.Request, buf []byte) {
 	}
 }
 
-func UploadOrCache(req *http.Request, buf []byte) string {
-	if IsUploadRequest(req) && checkSupportedMediaType(buf) {
-		return "upload"
-	} else if !IsUploadRequest(req) && checkSupportedMediaType(buf) && req.Header.Get("cached") == "" {
-		return "cache"
+func imageRouting(req *http.Request, buf []byte) string {
+	if checkSupportedMediaType(buf) {
+		if IsUploadRequest(req) {
+			return "upload"
+		}
+		if req.Header.Get("cached") == "" {
+			return "cache"
+		} else if req.Header.Get("cached") == "DATA" {
+			return "process"
+		}
+		return "origin"
 	}
 	return ""
 }
@@ -71,20 +77,19 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			return
 		}
 		setResponseHeader(w, req)
-		if req.Header.Get("cached") != "" {
-			operation = Origin
-		}
-		uploadedBuf := imageHandler(w, req, buf, operation, o)
-		if uploadedBuf != nil {
-			buf = uploadedBuf
-		}
 
-		switch UploadOrCache(req, buf) {
+		switch imageRouting(req, buf) {
 		case "upload":
+			imageHandler(w, req, buf, Info, o)
 			UploadImage(req, buf)
 		case "cache":
+			uploadedBuf := imageHandler(w, req, buf, operation, o)
 			req.Method = "POST"
-			UploadImage(req, buf)
+			UploadImage(req, uploadedBuf)
+		case "process":
+			imageHandler(w, req, buf, operation, o)
+		case "origin":
+			imageHandler(w, req, buf, Origin, o)
 		}
 	}
 }
@@ -136,7 +141,7 @@ func IsPublic(r *http.Request) bool {
 	return false
 }
 
-func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) []byte {
+func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, operation Operation, o ServerOptions) []byte {
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
 	// If cannot infer the type, infer it via magic numbers
@@ -165,7 +170,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation 
 		return nil
 	}
 
-	image, err := Operation.Run(buf, opts)
+	image, err := operation.Run(buf, opts)
 	if err != nil {
 		ErrorReply(r, w, NewError("Error while processing the image: "+err.Error(), BadRequest), o)
 		return nil

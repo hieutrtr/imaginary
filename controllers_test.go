@@ -70,7 +70,7 @@ func TestGetUncachedCephImageController(t *testing.T) {
 
 	fmt.Println(MockImgProcess(req))
 
-	if UploadOrCache(req, img) != "cache" {
+	if imageRouting(req, img) != "cache" {
 		t.Fatalf("Image is not cached with attribute <%s>\n", req.Header.Get("cached"))
 	}
 }
@@ -82,7 +82,7 @@ func TestUploadCephImageController(t *testing.T) {
 
 	fmt.Println(MockImgProcess(req))
 
-	if UploadOrCache(req, img) != "upload" {
+	if imageRouting(req, img) != "upload" {
 		t.Fatal("Should not upload image")
 	}
 }
