@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -33,13 +32,13 @@ func healthController(w http.ResponseWriter, r *http.Request) {
 func UploadImage(req *http.Request, buf []byte) {
 	var connection = MatchConnection(req)
 	if connection == nil {
-		log.Print(ErrMissingConnection)
+		LoggerError.Println(ErrMissingConnection)
 		return
 	}
 
 	err := connection.Execute(req, buf)
 	if err != nil {
-		log.Print(NewError(err.Error(), BadRequest))
+		LoggerError.Println(NewError(err.Error(), BadRequest))
 		return
 	}
 }

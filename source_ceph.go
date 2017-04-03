@@ -66,6 +66,9 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 		req.Header.Set("Last-Modified", stat.ModTime.String())
 	}
 	req.Header.Set("cached", cached)
+	if cached == "" {
+		LoggerDebug.Println("Object need to be cached\n")
+	}
 	return buf, err
 }
 

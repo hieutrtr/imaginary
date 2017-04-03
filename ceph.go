@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -101,7 +100,7 @@ func (c *Ceph) SetAttr(buf []byte) error {
 		if c.Attr == "" {
 			c.Attr = DATA
 		} else if c.Attr != DATA {
-			log.Println("INFO: cache Object's attribute", c.CephObject)
+			LoggerInfo.Println("cache Object's attribute", c.CephObject)
 		}
 		errSignal <- c.Context[c.Pool].SetXattr(c.OID, c.Attr, buf)
 	}()
