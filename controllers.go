@@ -50,7 +50,7 @@ func imageRouting(req *http.Request, buf []byte) string {
 		}
 		if req.Header.Get("cached") == "" {
 			return "cache"
-		} else if req.Header.Get("cached") == "DATA" {
+		} else if req.Header.Get("cached") == DATA {
 			return "process"
 		}
 		return "origin"
