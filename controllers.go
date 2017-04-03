@@ -73,11 +73,10 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			ErrorReply(req, w, ErrEmptyBody, o)
 			return
 		}
-
+		setResponseHeader(w, req)
 		if req.Header.Get("cached") != "" {
 			operation = Origin
 		}
-		setResponseHeader(w, req)
 		uploadedBuf := imageHandler(w, req, buf, operation, o)
 		if uploadedBuf != nil {
 			buf = uploadedBuf
@@ -146,10 +145,6 @@ func IsPublic(r *http.Request) bool {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, Operation Operation, o ServerOptions) []byte {
-
-	if r.Header.Get("cached") != "" {
-		Operation = Origin
-	}
 	// Infer the body MIME type via mimesniff algorithm
 	mimeType := http.DetectContentType(buf)
 	// If cannot infer the type, infer it via magic numbers
