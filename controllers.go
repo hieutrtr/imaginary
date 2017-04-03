@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -29,27 +30,24 @@ func healthController(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func UploadImage(req *http.Request, buf []byte) (error, int) {
+func UploadImage(req *http.Request, buf []byte) {
 	var connection = MatchConnection(req)
 	if connection == nil {
-		return ErrMissingConnection, ErrMissingConnection.HTTPCode()
+		log.Print(ErrMissingConnection)
+		return
 	}
 
 	err := connection.Execute(req, buf)
 	if err != nil {
-		e := NewError(err.Error(), BadRequest)
-		return e, e.HTTPCode()
+		log.Print(NewError(err.Error(), BadRequest))
+		return
 	}
-	return nil, 0
 }
 
 func UploadOrCache(req *http.Request, buf []byte) string {
-	fmt.Println("UploadOrCache", req.Header.Get("cached"))
 	if IsUploadRequest(req) && checkSupportedMediaType(buf) {
-		fmt.Println("upload")
 		return "upload"
 	} else if !IsUploadRequest(req) && checkSupportedMediaType(buf) && req.Header.Get("cached") == "" {
-		fmt.Println("cache")
 		return "cache"
 	}
 	return ""
@@ -82,17 +80,12 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			buf = uploadedBuf
 		}
 
-		var code int
 		switch UploadOrCache(req, buf) {
 		case "upload":
-			err, code = UploadImage(req, buf)
+			UploadImage(req, buf)
 		case "cache":
 			req.Method = "POST"
-			err, code = UploadImage(req, buf)
-		}
-
-		if err != nil {
-			ErrorReply(req, w, NewError(err.Error(), uint8(code)), o)
+			UploadImage(req, buf)
 		}
 	}
 }

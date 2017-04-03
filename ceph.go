@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -78,7 +79,6 @@ func (c *Ceph) IsEnable() bool {
 // DelObj delete an object from ceph
 func (c *Ceph) DelObj() error {
 	errSignal := make(chan error, 1)
-	fmt.Println("DelObj", c)
 	go func() {
 		errSignal <- c.Context[c.Pool].Delete(c.OID)
 	}()
@@ -97,10 +97,11 @@ func (c *Ceph) DelObj() error {
 // SetAttr push attribute to ceph object
 func (c *Ceph) SetAttr(buf []byte) error {
 	errSignal := make(chan error, 1)
-	fmt.Println("SetAtr", c.Attr)
 	go func() {
 		if c.Attr == "" {
 			c.Attr = DATA
+		} else if c.Attr != DATA {
+			log.Println("INFO: cache Object's attribute", c.CephObject)
 		}
 		errSignal <- c.Context[c.Pool].SetXattr(c.OID, c.Attr, buf)
 	}()
@@ -125,7 +126,6 @@ func (c *Ceph) GetAttr() ([]byte, error) {
 		if c.Attr == "" {
 			c.Attr = DATA
 		}
-		fmt.Println("GetAttr", c)
 		leng, err := c.Context[c.Pool].GetXattr(c.OID, c.Attr, data)
 		if err != nil {
 			errSignal <- NewError("Data is not exists", NotFound)
@@ -185,7 +185,6 @@ func getCacheAttr(req *http.Request) string {
 		for _, a := range cephAttributes {
 			if a == parts[len(parts)-1] {
 				attr := fmt.Sprintf("%s_%s", a, req.URL.RawQuery)
-				fmt.Println("getCacheAttr", attr)
 				return attr
 			}
 		}

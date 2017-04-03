@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	gorilla "github.com/gorilla/mux"
@@ -68,12 +69,11 @@ func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 
 	// Clear object before update original data
 	if c.Attr == DATA {
-		err = c.DelObj()
+		if err = c.DelObj(); err != nil {
+			log.Println("WARNING: No object match with", c.CephObject, "to delete with reason", err)
+		}
 	}
-	if err == nil {
-		err = c.SetAttr(buf)
-	}
-	return err
+	return c.SetAttr(buf)
 }
 
 func init() {
