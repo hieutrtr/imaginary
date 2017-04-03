@@ -49,6 +49,7 @@ func (c *CephConnection) writeToBlock(buf []byte) error {
 
 // Execute purpose of openning connection
 func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
+	var err error
 	if !c.IsEnable() {
 		return NewError("ceph: service is not supported", Unsupported)
 	}
@@ -59,12 +60,20 @@ func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
 	}
 
 	if !c.OnContext() {
-		err := c.OpenContext()
+		err = c.OpenContext()
 		if err != nil {
 			return err
 		}
 	}
-	return c.SetAttr(buf)
+
+	// Clear object before update original data
+	if c.Attr == DATA {
+		err = c.DelObj()
+	}
+	if err == nil {
+		err = c.SetAttr(buf)
+	}
+	return err
 }
 
 func init() {

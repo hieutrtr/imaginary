@@ -75,6 +75,25 @@ func (c *Ceph) IsEnable() bool {
 	return c.Enable
 }
 
+// DelObj delete an object from ceph
+func (c *Ceph) DelObj() error {
+	errSignal := make(chan error, 1)
+	fmt.Println("DelObj", c)
+	go func() {
+		errSignal <- c.Context[c.Pool].Delete(c.OID)
+	}()
+
+	select {
+	case <-time.After(time.Second * CTX_TIMEOUT):
+		return NewError("Ceph Connection Timeout", 1)
+	case err := <-errSignal:
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
 // SetAttr push attribute to ceph object
 func (c *Ceph) SetAttr(buf []byte) error {
 	errSignal := make(chan error, 1)
@@ -106,6 +125,7 @@ func (c *Ceph) GetAttr() ([]byte, error) {
 		if c.Attr == "" {
 			c.Attr = DATA
 		}
+		fmt.Println("GetAttr", c)
 		leng, err := c.Context[c.Pool].GetXattr(c.OID, c.Attr, data)
 		if err != nil {
 			errSignal <- NewError("Data is not exists", NotFound)
@@ -161,7 +181,6 @@ func (c *Ceph) BindRequest(req *http.Request) {
 
 func getCacheAttr(req *http.Request) string {
 	parts := strings.Split(req.URL.Path, "/")
-
 	if parts[1] != "upload" {
 		for _, a := range cephAttributes {
 			if a == parts[len(parts)-1] {
