@@ -52,22 +52,25 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if s.UseBlock {
 		return s.readFromBlock()
 	}
-	cached := s.Attr
+
 	buf, err := s.fetchObject()
 	if s.Attr != DATA {
 		if buf == nil {
 			s.Attr = DATA
 			buf, err = s.fetchObject()
-			cached = ""
+			LoggerDebug.Println("Object need to be cached")
+		} else {
+			req.Header.Set("cached", s.Attr) // It's cached
 		}
+	} else {
+		req.Header.Set("cached", s.Attr) // Use original data - set as 'data'
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	if stat, err := s.GetStat(); err == nil {
 		req.Header.Set("Last-Modified", stat.ModTime.String())
-	}
-	req.Header.Set("cached", cached)
-	if cached == "" {
-		LoggerDebug.Println("Object need to be cached")
 	}
 	return buf, err
 }

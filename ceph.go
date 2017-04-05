@@ -127,7 +127,7 @@ func (c *Ceph) GetAttr() ([]byte, error) {
 		}
 		leng, err := c.Context[c.Pool].GetXattr(c.OID, c.Attr, data)
 		if err != nil {
-			errSignal <- NewError("Data is not exists", NotFound)
+			errSignal <- err
 		}
 		// Remove any NULL characters from buffer
 		if data == nil {
