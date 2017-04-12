@@ -48,12 +48,12 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
-	// s.BindRequest(req)
+
 	if s.UseBlock {
-		return s.readFromBlock()
+		return ioutil.ReadFile(s.GetBlockPath(BindRequest(req)))
 	}
 
-	buf, err := s.fetchObject(req)
+	buf, err := s.GetAttr(BindRequest(req))
 	// if s.Attr != DATA && buf == nil {
 	// 	s.Attr = DATA
 	// 	buf, err = s.fetchObject(req)
@@ -65,25 +65,10 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	// if stat, err := s.GetStat(); err == nil {
-	// 	req.Header.Set("Last-Modified", stat.ModTime.String())
-	// }
-	return buf, err
-}
-
-func (s *CephImageSource) readFromBlock() ([]byte, error) {
-	return ioutil.ReadFile(s.GetBlockPath())
-}
-
-func (s *CephImageSource) fetchObject(req *http.Request) ([]byte, error) {
-	vars := gorilla.Vars(req)
-	if !s.OnContext(vars["service"]) {
-		err := s.OpenContext(vars["service"])
-		if err != nil {
-			return nil, err
-		}
+	if stat, err := s.GetStat(BindRequest(req)); err == nil {
+		req.Header.Set("Last-Modified", stat.ModTime.String())
 	}
-	return s.GetAttr(vars["service"], vars["oid"], DATA)
+	return buf, err
 }
 
 func init() {

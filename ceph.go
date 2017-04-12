@@ -32,7 +32,6 @@ var cephAttributes = []string{
 type Ceph struct {
 	Connection *rados.Conn
 	Context    map[string]*rados.IOContext
-	CephObject
 	CephConfig
 }
 
@@ -53,13 +52,19 @@ type CephObject struct {
 
 // GetStat of object from ceph
 // TODO: Need improve with handling connection timeout
-func (c *Ceph) GetStat() (rados.ObjectStat, error) {
-	return c.Context[c.Pool].Stat(c.OID)
+func (c *Ceph) GetStat(obj *CephObject) (rados.ObjectStat, error) {
+	if !c.OnContext(obj.Pool) {
+		err := c.OpenContext(obj.Pool)
+		if err != nil {
+			return rados.ObjectStat{}, err
+		}
+	}
+	return c.Context[obj.Pool].Stat(obj.OID)
 }
 
 // GetBlockPath build block storage path
-func (c *Ceph) GetBlockPath() string {
-	return fmt.Sprintf("/%s/%s/%s", c.BlockURL, c.Pool, c.OID)
+func (c *Ceph) GetBlockPath(obj *CephObject) string {
+	return fmt.Sprintf("/%s/%s/%s", c.BlockURL, obj.Pool, obj.OID)
 }
 
 // OnContext check if context in request is registered
@@ -76,10 +81,10 @@ func (c *Ceph) IsEnable() bool {
 }
 
 // DelObj delete an object from ceph
-func (c *Ceph) DelObj() error {
+func (c *Ceph) DelObj(obj *CephObject) error {
 	errSignal := make(chan error, 1)
 	go func() {
-		errSignal <- c.Context[c.Pool].Delete(c.OID)
+		errSignal <- c.Context[obj.Pool].Delete(obj.OID)
 	}()
 
 	select {
@@ -94,15 +99,22 @@ func (c *Ceph) DelObj() error {
 }
 
 // SetAttr push attribute to ceph object
-func (c *Ceph) SetAttr(Pool, OID, Attr string, buf []byte) error {
+func (c *Ceph) SetAttr(obj *CephObject, buf []byte) error {
+	if !c.OnContext(obj.Pool) {
+		err := c.OpenContext(obj.Pool)
+		if err != nil {
+			return err
+		}
+	}
+
 	errSignal := make(chan error, 1)
 	go func() {
-		if Attr == "" {
-			Attr = DATA
-		} else if Attr != DATA {
-			LoggerInfo.Println("cache Object's attribute", Pool, OID, Attr)
+		if obj.Attr == "" {
+			obj.Attr = DATA
+		} else if obj.Attr != DATA {
+			LoggerInfo.Println("cache Object's attribute", obj)
 		}
-		errSignal <- c.Context[Pool].SetXattr(OID, Attr, buf)
+		errSignal <- c.Context[obj.Pool].SetXattr(obj.OID, obj.Attr, buf)
 	}()
 
 	select {
@@ -117,15 +129,21 @@ func (c *Ceph) SetAttr(Pool, OID, Attr string, buf []byte) error {
 }
 
 // GetAttr fetch object attribute DATA from ceph
-func (c *Ceph) GetAttr(Pool, OID, Attr string) ([]byte, error) {
+func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
+	if !c.OnContext(obj.Pool) {
+		err := c.OpenContext(obj.Pool)
+		if err != nil {
+			return nil, err
+		}
+	}
 	errSignal := make(chan error, 1)
 	lengSignal := make(chan int, 1)
 	data := make([]byte, IMAGE_MAX_BYTE)
 	go func() {
-		if Attr == "" {
-			Attr = DATA
+		if obj.Attr == "" {
+			obj.Attr = DATA
 		}
-		leng, err := c.Context[Pool].GetXattr(OID, Attr, data)
+		leng, err := c.Context[obj.Pool].GetXattr(obj.OID, obj.Attr, data)
 		if err != nil {
 			errSignal <- NewError(err.Error(), NotFound)
 		}
@@ -148,9 +166,9 @@ func (c *Ceph) GetAttr(Pool, OID, Attr string) ([]byte, error) {
 }
 
 // DestroyContext when finish ceph jobs
-func (c *Ceph) DestroyContext() {
-	c.Context[c.Pool].Destroy()
-}
+// func (c *Ceph) DestroyContext() {
+// 	c.Context[c.Pool].Destroy()
+// }
 
 // OpenContext provide context from existed pool on ceph cluster
 // Should ask sysad to create pool on ceph first
@@ -167,10 +185,10 @@ func (c *Ceph) OpenContext(Pool string) error {
 }
 
 // BindRequest Initialize CephObject need to get ceph object
-func (c *Ceph) BindRequest(req *http.Request) {
+func BindRequest(req *http.Request) *CephObject {
 	vars := gorilla.Vars(req)
 	attr := getCacheAttr(req)
-	c.CephObject = CephObject{
+	return &CephObject{
 		Pool: vars["service"],
 		OID:  vars["oid"],
 		Attr: attr,
@@ -191,13 +209,13 @@ func getCacheAttr(req *http.Request) string {
 }
 
 // BindObject Initialize CephObject to get ceph object by attribute
-func (c *Ceph) BindObject(vars map[string]string) {
-	c.CephObject = CephObject{
-		Pool: vars["service"],
-		OID:  vars["oid"],
-		Attr: vars["attr"],
-	}
-}
+// func (c *Ceph) BindObject(vars map[string]string) {
+// 	c.CephObject = CephObject{
+// 		Pool: vars["service"],
+// 		OID:  vars["oid"],
+// 		Attr: vars["attr"],
+// 	}
+// }
 
 // Connect do connect steps with ceph server by config path
 // ConfigPath : /etc/ceph/ceph.conf by default
