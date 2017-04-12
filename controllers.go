@@ -90,6 +90,8 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			imageHandler(w, req, buf, operation, o)
 		case "origin":
 			imageHandler(w, req, buf, Origin, o)
+		case "":
+			ErrorReply(req, w, ErrUnsupportedMedia, o)
 		}
 	}
 }
