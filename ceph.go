@@ -24,8 +24,8 @@ const (
 )
 
 var cephAttributes = []string{
-	"thumbnail",
-	"watermark",
+// "thumbnail",
+// "watermark",
 }
 
 // Ceph main struct of ceph
