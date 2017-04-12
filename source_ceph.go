@@ -48,26 +48,26 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
-	s.BindRequest(req)
+	// s.BindRequest(req)
 	if s.UseBlock {
 		return s.readFromBlock()
 	}
 
-	buf, err := s.fetchObject()
-	if s.Attr != DATA && buf == nil {
-		s.Attr = DATA
-		buf, err = s.fetchObject()
-		LoggerDebug.Println("Object need to be cached")
-	} else {
-		req.Header.Set("cached", s.Attr)
-	}
+	buf, err := s.fetchObject(req)
+	// if s.Attr != DATA && buf == nil {
+	// 	s.Attr = DATA
+	// 	buf, err = s.fetchObject(req)
+	// 	LoggerDebug.Println("Object need to be cached")
+	// } else {
+	// 	req.Header.Set("cached", s.Attr)
+	// }
 	if err != nil {
 		return nil, err
 	}
 
-	if stat, err := s.GetStat(); err == nil {
-		req.Header.Set("Last-Modified", stat.ModTime.String())
-	}
+	// if stat, err := s.GetStat(); err == nil {
+	// 	req.Header.Set("Last-Modified", stat.ModTime.String())
+	// }
 	return buf, err
 }
 
@@ -75,14 +75,15 @@ func (s *CephImageSource) readFromBlock() ([]byte, error) {
 	return ioutil.ReadFile(s.GetBlockPath())
 }
 
-func (s *CephImageSource) fetchObject() ([]byte, error) {
-	if !s.OnContext() {
-		err := s.OpenContext()
+func (s *CephImageSource) fetchObject(req *http.Request) ([]byte, error) {
+	vars := gorilla.Vars(req)
+	if !s.OnContext(vars["service"]) {
+		err := s.OpenContext(vars["service"])
 		if err != nil {
 			return nil, err
 		}
 	}
-	return s.GetAttr()
+	return s.GetAttr(vars["service"], vars["oid"], DATA)
 }
 
 func init() {

@@ -48,31 +48,33 @@ func (c *CephConnection) writeToBlock(buf []byte) error {
 }
 
 // Execute purpose of openning connection
-func (c *CephConnection) Execute(r *http.Request, buf []byte) error {
+func (c *CephConnection) Execute(req *http.Request, buf []byte) error {
 	var err error
 	if !c.IsEnable() {
 		return NewError("ceph: service is not supported", Unsupported)
 	}
-	c.BindRequest(r)
+	// c.BindRequest(r)
 
 	if c.UseBlock {
 		return c.writeToBlock(buf)
 	}
 
-	if !c.OnContext() {
-		err = c.OpenContext()
+	vars := gorilla.Vars(req)
+	if !c.OnContext(vars["service"]) {
+		err = c.OpenContext(vars["service"])
 		if err != nil {
 			return err
 		}
 	}
 
 	// Clear object before update original data
-	if c.Attr == DATA {
-		if err = c.DelObj(); err != nil {
-			LoggerInfo.Println("WARNING: No object match with", c.CephObject, "to delete with reason", err)
-		}
-	}
-	return c.SetAttr(buf)
+	// if c.Attr == DATA {
+	// 	if err = c.DelObj(); err != nil {
+	// 		LoggerInfo.Println("WARNING: No object match with", c.CephObject, "to delete with reason", err)
+	// 	}
+	// }
+
+	return c.SetAttr(vars["service"], vars["oid"], DATA, buf)
 }
 
 func init() {

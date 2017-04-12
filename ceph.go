@@ -63,8 +63,8 @@ func (c *Ceph) GetBlockPath() string {
 }
 
 // OnContext check if context in request is registered
-func (c *Ceph) OnContext() bool {
-	if c.Context[c.Pool] == nil {
+func (c *Ceph) OnContext(Pool string) bool {
+	if c.Context[Pool] == nil {
 		return false
 	}
 	return true
@@ -94,15 +94,15 @@ func (c *Ceph) DelObj() error {
 }
 
 // SetAttr push attribute to ceph object
-func (c *Ceph) SetAttr(buf []byte) error {
+func (c *Ceph) SetAttr(Pool, OID, Attr string, buf []byte) error {
 	errSignal := make(chan error, 1)
 	go func() {
-		if c.Attr == "" {
-			c.Attr = DATA
-		} else if c.Attr != DATA {
-			LoggerInfo.Println("cache Object's attribute", c.CephObject)
+		if Attr == "" {
+			Attr = DATA
+		} else if Attr != DATA {
+			LoggerInfo.Println("cache Object's attribute", Pool, OID, Attr)
 		}
-		errSignal <- c.Context[c.Pool].SetXattr(c.OID, c.Attr, buf)
+		errSignal <- c.Context[Pool].SetXattr(OID, Attr, buf)
 	}()
 
 	select {
@@ -117,15 +117,15 @@ func (c *Ceph) SetAttr(buf []byte) error {
 }
 
 // GetAttr fetch object attribute DATA from ceph
-func (c *Ceph) GetAttr() ([]byte, error) {
+func (c *Ceph) GetAttr(Pool, OID, Attr string) ([]byte, error) {
 	errSignal := make(chan error, 1)
 	lengSignal := make(chan int, 1)
 	data := make([]byte, IMAGE_MAX_BYTE)
 	go func() {
-		if c.Attr == "" {
-			c.Attr = DATA
+		if Attr == "" {
+			Attr = DATA
 		}
-		leng, err := c.Context[c.Pool].GetXattr(c.OID, c.Attr, data)
+		leng, err := c.Context[Pool].GetXattr(OID, Attr, data)
 		if err != nil {
 			errSignal <- NewError(err.Error(), NotFound)
 		}
@@ -154,15 +154,15 @@ func (c *Ceph) DestroyContext() {
 
 // OpenContext provide context from existed pool on ceph cluster
 // Should ask sysad to create pool on ceph first
-func (c *Ceph) OpenContext() error {
-	ioctx, err := c.Connection.OpenIOContext(c.Pool)
+func (c *Ceph) OpenContext(Pool string) error {
+	ioctx, err := c.Connection.OpenIOContext(Pool)
 	if err != nil {
-		return NewError("ceph: cannot open context of pool "+c.Pool, BadRequest)
+		return NewError("ceph: cannot open context of pool "+Pool, BadRequest)
 	}
 	if c.Context == nil {
 		c.Context = make(map[string]*rados.IOContext)
 	}
-	c.Context[c.Pool] = ioctx
+	c.Context[Pool] = ioctx
 	return nil
 }
 
