@@ -49,11 +49,12 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
 
+	vars := gorilla.Vars(req)
 	if s.UseBlock {
-		return ioutil.ReadFile(s.GetBlockPath(BindRequest(req)))
+		return ioutil.ReadFile(s.GetBlockPath(BindObject(vars)))
 	}
 
-	buf, err := s.GetAttr(BindRequest(req))
+	buf, err := s.GetAttr(BindObject(vars))
 	// if s.Attr != DATA && buf == nil {
 	// 	s.Attr = DATA
 	// 	buf, err = s.fetchObject(req)
@@ -66,7 +67,7 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	if stat, err := s.GetStat(BindRequest(req)); err == nil {
+	if stat, err := s.GetStat(BindObject(vars)); err == nil {
 		req.Header.Set("Last-Modified", stat.ModTime.String())
 	}
 	return buf, err

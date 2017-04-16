@@ -187,7 +187,7 @@ func (c *Ceph) OpenContext(Pool string) error {
 // BindRequest Initialize CephObject need to get ceph object
 func BindRequest(req *http.Request) *CephObject {
 	vars := gorilla.Vars(req)
-	attr := getCacheAttr(req)
+	attr := getCacheAttr(req.URL.Path, req.URL.RawQuery)
 	return &CephObject{
 		Pool: vars["service"],
 		OID:  vars["oid"],
@@ -195,12 +195,12 @@ func BindRequest(req *http.Request) *CephObject {
 	}
 }
 
-func getCacheAttr(req *http.Request) string {
-	parts := strings.Split(req.URL.Path, "/")
+func getCacheAttr(urlPath, rawQuery string) string {
+	parts := strings.Split(urlPath, "/")
 	if parts[1] != "upload" {
 		for _, a := range cephAttributes {
 			if a == parts[len(parts)-1] {
-				attr := fmt.Sprintf("%s_%s", a, req.URL.RawQuery)
+				attr := fmt.Sprintf("%s_%s", a, rawQuery)
 				return attr
 			}
 		}
@@ -209,13 +209,13 @@ func getCacheAttr(req *http.Request) string {
 }
 
 // BindObject Initialize CephObject to get ceph object by attribute
-// func (c *Ceph) BindObject(vars map[string]string) {
-// 	c.CephObject = CephObject{
-// 		Pool: vars["service"],
-// 		OID:  vars["oid"],
-// 		Attr: vars["attr"],
-// 	}
-// }
+func BindObject(vars map[string]string) *CephObject {
+	return &CephObject{
+		Pool: vars["service"],
+		OID:  vars["oid"],
+		Attr: DATA,
+	}
+}
 
 // Connect do connect steps with ceph server by config path
 // ConfigPath : /etc/ceph/ceph.conf by default

@@ -50,8 +50,10 @@ func (c *CephConnection) Execute(req *http.Request, buf []byte) error {
 		return NewError("ceph: service is not supported", Unsupported)
 	}
 
+	vars := gorilla.Vars(req)
+
 	if c.UseBlock {
-		return ioutil.WriteFile(c.GetBlockPath(BindRequest(req)), buf, 0644)
+		return ioutil.WriteFile(c.GetBlockPath(BindObject(vars)), buf, 0644)
 	}
 
 	// Clear object before update original data
@@ -61,7 +63,7 @@ func (c *CephConnection) Execute(req *http.Request, buf []byte) error {
 	// 	}
 	// }
 
-	return c.SetAttr(BindRequest(req), buf)
+	return c.SetAttr(BindObject(vars), buf)
 }
 
 func init() {

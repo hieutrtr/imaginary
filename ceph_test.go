@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var c *Ceph
@@ -17,9 +18,6 @@ func TestConnect(t *testing.T) {
 			UseBlock:   false,
 			BlockURL:   "",
 		},
-		CephObject: CephObject{
-			Pool: "test",
-		},
 	}
 	err := c.Connect()
 	if err != nil {
@@ -28,29 +26,34 @@ func TestConnect(t *testing.T) {
 }
 
 func TestOpenContext(t *testing.T) {
-	err := c.OpenContext()
+	pool := "test"
+	err := c.OpenContext(pool)
 	if err != nil {
-		t.Fatal("Fail to open Ceph conext: ", c.Pool)
+		t.Fatal("Fail to open Ceph conext: ", pool)
 	}
 }
 
-func TestBindRequest(t *testing.T) {
+var cephObj *CephObject
+
+func TestBindObject(t *testing.T) {
 	vars := map[string]string{
 		"service": "test",
 		"oid":     "testobjstats",
-		"attr":    "thumb",
+		"attr":    DATA,
 	}
-	c.BindObject(vars)
-	if c.CephObject.Pool != vars["service"] || c.CephObject.OID != vars["oid"] || c.CephObject.Attr != vars["attr"] {
-		t.Fatal("BindObject is fail")
-	}
+	assert := assert.New(t)
+	cephObj = BindObject(vars)
+	assert.Equal(cephObj.Pool, vars["service"], "service is fail bound")
+	assert.Equal(cephObj.OID, vars["oid"], "service is fail oid")
+	assert.Equal(cephObj.Attr, vars["attr"], "service is fail attr")
 }
 
 var imgTest = []byte("ImageOfTesting")
 
 func TestSetAttr(t *testing.T) {
-	if c.OnContext() {
-		err := c.SetAttr(imgTest)
+	pool := "test"
+	if c.OnContext(pool) {
+		err := c.SetAttr(cephObj, imgTest)
 		if err != nil {
 			t.Fatal("Set Attr to object is fail")
 		}
@@ -58,8 +61,9 @@ func TestSetAttr(t *testing.T) {
 }
 
 func TestGetAttr(t *testing.T) {
-	if c.OnContext() {
-		buf, err := c.GetAttr()
+	pool := "test"
+	if c.OnContext(pool) {
+		buf, err := c.GetAttr(cephObj)
 		if err != nil {
 			t.Fatal("Get Attr from object is fail")
 		}
@@ -70,20 +74,12 @@ func TestGetAttr(t *testing.T) {
 }
 
 func TestGetStat(t *testing.T) {
-	if c.OnContext() {
-		stats, err := c.GetStat()
+	pool := "test"
+	if c.OnContext(pool) {
+		stats, err := c.GetStat(cephObj)
 		if err != nil {
 			t.Fatal("Getting Stats from ceph is fail on error", err.Error())
 		}
 		fmt.Println(stats.ModTime)
-	}
-}
-
-func TestGetCachedAttr(t *testing.T) {
-	url := "http://imaginaryct.com/7d6e3468f88cccbde9e94062650d632786dd54ea/ads/123/thumbnail?width=100"
-	req := httptest.NewRequest("GET", url, nil)
-	attr := getCacheAttr(req)
-	if attr != "thumbnail_width=100" {
-		t.Fatal("fail to get attr for caching", attr)
 	}
 }
