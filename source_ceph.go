@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	gorilla "github.com/gorilla/mux"
+	"github.com/noahdesu/go-ceph/rados"
 )
 
 // ImageSourceTypeCeph name of regiter source
@@ -44,6 +45,36 @@ func (s *CephImageSource) Matches(r *http.Request) bool {
 }
 
 // GetImage from ceph
+func (s *CephImageSource) IndependGetImage(co *CephObject) ([]byte, rados.ObjectStat, error) {
+
+	var buf []byte
+	var stat rados.ObjectStat
+	var err error
+
+	if !s.IsEnable() {
+		return buf, stat, NewError("ceph: service is not supported", Unsupported)
+	}
+
+	if s.UseBlock {
+		if buf, err = ioutil.ReadFile(s.GetBlockPath(co)); err != nil {
+			return nil, stat, err
+		}
+		return buf, stat, nil
+	}
+
+	if buf, err = s.GetAttr(co); err != nil {
+		return nil, stat, err
+	}
+
+	if stat, err = s.GetStat(co); err != nil {
+		// req.Header.Set("Last-Modified", stat.ModTime.String())
+		return nil, stat, err
+	}
+
+	return buf, stat, nil
+}
+
+// GetImage from ceph
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
@@ -55,14 +86,7 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	}
 
 	buf, err := s.GetAttr(BindObject(vars))
-	// if s.Attr != DATA && buf == nil {
-	// 	s.Attr = DATA
-	// 	buf, err = s.fetchObject(req)
-	// 	LoggerDebug.Println("Object need to be cached")
-	// } else {
-	// 	req.Header.Set("cached", s.Attr)
 	req.Header.Set("cached", DATA)
-	// }
 	if err != nil {
 		return nil, err
 	}
