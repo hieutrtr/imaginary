@@ -11,6 +11,17 @@ import (
 	"gopkg.in/h2non/filetype.v0"
 )
 
+const (
+	UPLOAD int = iota
+	CACHE
+	PROCESS
+)
+
+var cachedAttributes = []string{
+	"thumbnail",
+	"watermark",
+}
+
 func indexController(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		ErrorReply(r, w, ErrNotFound, ServerOptions{})
@@ -41,6 +52,28 @@ func UploadImage(req *http.Request, buf []byte) {
 		LoggerError.Println(NewError(err.Error(), BadRequest))
 		return
 	}
+}
+
+func getCacheAttr(urlPath, rawQuery string) string {
+	parts := strings.Split(urlPath, "/")
+	for _, a := range cachedAttributes {
+		if a == parts[len(parts)-1] {
+			attr := fmt.Sprintf("%s_%s", a, rawQuery)
+			return attr
+		}
+	}
+	return DATA
+}
+
+func routingRequest(req *http.Request) int {
+	if IsUploadRequest(req) {
+		return UPLOAD
+	}
+	attr := getCacheAttr(req.URL.Path, req.URL.RawQuery)
+	if attr == DATA {
+		return PROCESS
+	}
+	return CACHE
 }
 
 func imageRouting(req *http.Request, buf []byte) string {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/noahdesu/go-ceph/rados"
@@ -15,18 +14,10 @@ import (
 
 const (
 	DATA               = "data"
-	WIDTH              = "width"
-	HEIGH              = "heigh"
-	SIZE               = "size"
 	IMAGE_MAX_BYTE     = 20971520
 	CONNECTION_TIMEOUT = 10
 	CTX_TIMEOUT        = 5
 )
-
-var cephAttributes = []string{
-// "thumbnail",
-// "watermark",
-}
 
 // Ceph main struct of ceph
 type Ceph struct {
@@ -193,19 +184,6 @@ func BindRequest(req *http.Request) *CephObject {
 		OID:  vars["oid"],
 		Attr: attr,
 	}
-}
-
-func getCacheAttr(urlPath, rawQuery string) string {
-	parts := strings.Split(urlPath, "/")
-	if parts[1] != "upload" {
-		for _, a := range cephAttributes {
-			if a == parts[len(parts)-1] {
-				attr := fmt.Sprintf("%s_%s", a, rawQuery)
-				return attr
-			}
-		}
-	}
-	return DATA
 }
 
 // BindObject Initialize CephObject to get ceph object by attribute

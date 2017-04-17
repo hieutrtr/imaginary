@@ -58,7 +58,7 @@ func (c *CephConnection) Execute(req *http.Request, buf []byte) error {
 
 	// Clear object before update original data
 	// if c.Attr == DATA {
-	// 	if err = c.DelObj(BindRequest(req)); err != nil {
+	// 	if err = c.DelObj(BindObject(vars)); err != nil {
 	// 		LoggerInfo.Println("WARNING: No object match with", c.CephObject, "to delete with reason", err)
 	// 	}
 	// }
