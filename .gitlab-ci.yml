@@ -18,6 +18,7 @@ dockerize:
   services:
     - docker:dind
   script:
+  - docker login registry.gitlab.com
   - docker build -t registry.gitlab.com/$REPO/$DIST_NAME:$VERSION .
   - docker push registry.gitlab.com/$REPO/$DIST_NAME:$VERSION
   tags:
