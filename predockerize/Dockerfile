@@ -10,9 +10,6 @@ ENV LIBVIPS_VERSION $LIBVIPS_VERSION_MAJOR.$LIBVIPS_VERSION_MINOR.$LIBVIPS_VERSI
 # Server port to listen
 ENV PORT 9000
 
-# Go version to use
-ENV GOLANG_VERSION 1.7.1
-
 RUN \
 
   # Install dependencies

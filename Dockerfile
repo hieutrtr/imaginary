@@ -2,6 +2,9 @@
 # and a workspace (GOPATH) configured at /go.
 FROM hieutrtr/imaginary_base:latest
 
+# Go version to use
+ENV GOLANG_VERSION 1.7.1
+
 # gcc for cgo
 RUN apt-get update && apt-get install -y \
     curl pkg-config glib-2.0 gcc git libc6-dev make ca-certificates librados-dev \
