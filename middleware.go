@@ -146,7 +146,7 @@ func validateImage(next http.Handler, o ServerOptions) http.Handler {
 			return
 		}
 
-		if r.Method == "GET" && o.Mount == "" && o.EnableURLSource == false {
+		if r.Method == "GET" && o.Mount == "" && o.EnableURLSource == false && o.EnableCeph == false {
 			ErrorReply(r, w, ErrMethodNotAllowed, o)
 			return
 		}
