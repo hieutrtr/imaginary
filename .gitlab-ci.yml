@@ -9,7 +9,6 @@ after_script:
 - tree
 
 stages:
-- test
 - dockerize
 - clean
 
@@ -21,14 +20,6 @@ dockerize:
   script:
   - docker build -t registry.gitlab.com/$REPO/$DIST_NAME:$VERSION .
   - docker push registry.gitlab.com/$REPO/$DIST_NAME:$VERSION
-  tags:
-  - docker
-
-test:
-  stage: test
-  image: golang:1.7
-  script:
-  - go test
   tags:
   - docker
 
