@@ -38,12 +38,12 @@ dockerize:
   tags:
   - docker
 
-test:
-  stage: test
-  script:
-  - go test
-  tags:
-  - docker
+# test:
+#   stage: test
+#   script:
+#   - go test
+#   tags:
+#   - docker
 
 clean:docker:
   stage: clean
