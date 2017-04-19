@@ -31,6 +31,7 @@ RUN go get -u golang.org/x/net/context
 WORKDIR $GOPATH/src/imaginary
 ADD . ./
 RUN go get  ./...
+RUN go test
 
 # Run the outyet command by default when the container starts.
 ENTRYPOINT ["/go/bin/imaginary"]
