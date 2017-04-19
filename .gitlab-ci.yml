@@ -26,6 +26,7 @@ dockerize:
 
 test:
   stage: test
+  image: golang:1.7
   script:
   - go test
   tags:
