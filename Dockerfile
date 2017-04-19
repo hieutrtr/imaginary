@@ -28,9 +28,13 @@ WORKDIR $GOPATH
 # Fetch the latest version of the package
 RUN go get -u golang.org/x/net/context
 
+# Install Godep
+RUN go get github.com/tools/godep
+
 WORKDIR $GOPATH/src/imaginary
 ADD . ./
-RUN go get  ./...
+RUN godep restore
+RUN go build
 RUN go test
 
 # Run the outyet command by default when the container starts.

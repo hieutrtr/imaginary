@@ -1,0 +1,163 @@
+{
+	"ImportPath": "github.com/hieutrtr/imaginary",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Shopify/sarama",
+			"Comment": "v1.11.0-42-g8d400eb",
+			"Rev": "8d400ebdd49e4dd4cee143a4acb3ff92224c1d69"
+		},
+		{
+			"ImportPath": "github.com/daaku/go.httpgzip",
+			"Rev": "a336c4bfd42faf5b18b9d90dcdfe3b4fc13a8fa5"
+		},
+		{
+			"ImportPath": "github.com/davecgh/go-spew/spew",
+			"Comment": "v1.1.0",
+			"Rev": "346938d642f2ec3594ed81d874461961cd0faa76"
+		},
+		{
+			"ImportPath": "github.com/eapache/go-resiliency/breaker",
+			"Comment": "v1.0.0-4-gb86b1ec",
+			"Rev": "b86b1ec0dd4209a588dc1285cdd471e73525c0b3"
+		},
+		{
+			"ImportPath": "github.com/eapache/go-xerial-snappy",
+			"Rev": "bb955e01b9346ac19dc29eb16586c90ded99a98c"
+		},
+		{
+			"ImportPath": "github.com/eapache/queue",
+			"Comment": "v1.0.2-7-g44cc805",
+			"Rev": "44cc805cf13205b55f69e14bcb69867d1ae92f98"
+		},
+		{
+			"ImportPath": "github.com/golang/snappy",
+			"Rev": "553a641470496b2327abcac10b36396bd98e45c9"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.3.0-1-g94e7d24",
+			"Rev": "94e7d24fd285520f3d12ae998f7fdd6b5393d453"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/golang-lru",
+			"Rev": "0a025b7e63adc15a622f29b0b2c4c3848243bbf6"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/golang-lru/simplelru",
+			"Rev": "0a025b7e63adc15a622f29b0b2c4c3848243bbf6"
+		},
+		{
+			"ImportPath": "github.com/hieutrtr/imgevent",
+			"Rev": "87af15d06fe3486c87d8af0e532406f94747685e"
+		},
+		{
+			"ImportPath": "github.com/klauspost/crc32",
+			"Comment": "v1.1-2-g1bab8b3",
+			"Rev": "1bab8b35b6bb565f92cbc97939610af9369f942a"
+		},
+		{
+			"ImportPath": "github.com/minio/minio-go",
+			"Comment": "v2.0.4-8-g7b192ec",
+			"Rev": "7b192eca021b35d9d9b478e8dde299fa4be06ee8"
+		},
+		{
+			"ImportPath": "github.com/minio/minio-go/pkg/policy",
+			"Comment": "v2.0.4-8-g7b192ec",
+			"Rev": "7b192eca021b35d9d9b478e8dde299fa4be06ee8"
+		},
+		{
+			"ImportPath": "github.com/minio/minio-go/pkg/s3signer",
+			"Comment": "v2.0.4-8-g7b192ec",
+			"Rev": "7b192eca021b35d9d9b478e8dde299fa4be06ee8"
+		},
+		{
+			"ImportPath": "github.com/minio/minio-go/pkg/s3utils",
+			"Comment": "v2.0.4-8-g7b192ec",
+			"Rev": "7b192eca021b35d9d9b478e8dde299fa4be06ee8"
+		},
+		{
+			"ImportPath": "github.com/minio/minio-go/pkg/set",
+			"Comment": "v2.0.4-8-g7b192ec",
+			"Rev": "7b192eca021b35d9d9b478e8dde299fa4be06ee8"
+		},
+		{
+			"ImportPath": "github.com/noahdesu/go-ceph/rados",
+			"Comment": "v.0.3.0-54-gf9be60a",
+			"Rev": "f9be60af9fc4794b09fc1e6a2e5cf8d9ef9f3803"
+		},
+		{
+			"ImportPath": "github.com/pierrec/lz4",
+			"Rev": "90290f74b1b4d9c097f0a3b3c7eba2ef3875c699"
+		},
+		{
+			"ImportPath": "github.com/pierrec/xxHash/xxHash32",
+			"Comment": "v0.1-4-g5a00444",
+			"Rev": "5a004441f897722c627870a981d02b29924215fa"
+		},
+		{
+			"ImportPath": "github.com/pmezard/go-difflib/difflib",
+			"Comment": "v1.0.0",
+			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
+		},
+		{
+			"ImportPath": "github.com/rcrowley/go-metrics",
+			"Rev": "1f30fe9094a513ce4c700b9a54458bbb0c96996c"
+		},
+		{
+			"ImportPath": "github.com/rs/cors",
+			"Comment": "v1.0",
+			"Rev": "a62a804a8a009876ca59105f7899938a1349f4b3"
+		},
+		{
+			"ImportPath": "github.com/rs/xhandler",
+			"Comment": "v1.0-1-ged27b6f",
+			"Rev": "ed27b6fd65218132ee50cd95f38474a3d8a2cd12"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.1.4-27-g4d4bfba",
+			"Rev": "4d4bfba8f1d1027c4fdbe371823030df51419987"
+		},
+		{
+			"ImportPath": "github.com/tj/go-debug",
+			"Comment": "v2.0.0",
+			"Rev": "ff4a55a20a86994118644bbddc6a216da193cc13"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "61557ac0112b576429a0df080e1c2cef5dfbb642"
+		},
+		{
+			"ImportPath": "gopkg.in/h2non/bimg.v1",
+			"Comment": "v1.0.7",
+			"Rev": "9bb3ae10c5ce30e72f7ac0834368536fc095d6a7"
+		},
+		{
+			"ImportPath": "gopkg.in/h2non/filetype.v0",
+			"Comment": "v0.1.0",
+			"Rev": "098c8d214a5ac605000f2a822fdc86793300cde6"
+		},
+		{
+			"ImportPath": "gopkg.in/h2non/filetype.v1/matchers",
+			"Comment": "v1.0.0",
+			"Rev": "e42395618f967c7925230905a29e63e787e88be6"
+		},
+		{
+			"ImportPath": "gopkg.in/h2non/filetype.v1/types",
+			"Comment": "v1.0.0",
+			"Rev": "e42395618f967c7925230905a29e63e787e88be6"
+		},
+		{
+			"ImportPath": "gopkg.in/throttled/throttled.v2",
+			"Comment": "v2.0.3",
+			"Rev": "b5675e93f9d999b22f92d859a5bf2138d3641af4"
+		},
+		{
+			"ImportPath": "gopkg.in/throttled/throttled.v2/store/memstore",
+			"Comment": "v2.0.3",
+			"Rev": "b5675e93f9d999b22f92d859a5bf2138d3641af4"
+		}
+	]
+}
