@@ -5,9 +5,6 @@ before_script:
 - export PACKAGE=imaginary
 - export DIST_NAME=imaginary
 
-after_script:
-- tree
-
 stages:
 - dockerize
 - clean
