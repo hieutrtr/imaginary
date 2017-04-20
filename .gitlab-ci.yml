@@ -1,8 +1,6 @@
 before_script:
 - pwd
-- export VERSION=latest
-- export REPO=hieutrtr
-- export PACKAGE=imaginary
+- export VERSION=4.4.0
 - export DIST_NAME=imaginary
 
 stages:
@@ -15,9 +13,9 @@ dockerize:
   services:
     - docker:dind
   script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  - docker build -t registry.gitlab.com/$REPO/$DIST_NAME:$VERSION .
-  - docker push registry.gitlab.com/$REPO/$DIST_NAME:$VERSION
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $DOCKER_REGISTRY
+  - docker build -t $DOCKER_REGISTRY/$DOCKER_REPO/$DIST_NAME:$VERSION .
+  - docker push $DOCKER_REGISTRY/$DOCKER_REPO/$DIST_NAME:$VERSION
   tags:
   - docker
 
@@ -25,6 +23,6 @@ clean:docker:
   stage: clean
   script:
   - docker images
-  - docker rmi -f registry.gitlab.com/$REPO/$DIST_NAME:$VERSION
+  - docker rmi -f $DOCKER_REGISTRY/$DOCKER_REPO/$DIST_NAME:$VERSION
   tags:
   - docker
