@@ -1,0 +1,26 @@
+variables:
+  DIST_NAME: wsm
+before_script:
+- pwd
+- export VERSION=$(wsm version)
+- export PACKAGE=$(wsm package)
+- export DIST_NAME=$(wsm dist-name)
+after_script:
+- tree
+stages:
+- dockerize
+- clean
+dockerize:
+  stage: dockerize
+  script:
+  - docker build -t docker.chotot.org/$DIST_NAME:$VERSION .
+  - docker push docker.chotot.org/$DIST_NAME:$VERSION
+  tags:
+  - shell
+clean:docker:
+  stage: clean
+  script:
+  - docker images
+  - docker rmi -f docker.chotot.org/$DIST_NAME:$VERSION
+  tags:
+  - shell
