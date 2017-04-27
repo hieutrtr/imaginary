@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	gorilla "github.com/gorilla/mux"
-	"github.com/noahdesu/go-ceph/rados"
 )
 
 // ImageSourceTypeCeph name of regiter source
@@ -42,36 +41,6 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 func (s *CephImageSource) Matches(r *http.Request) bool {
 	vars := gorilla.Vars(r)
 	return r.Method == "GET" && vars["service"] != "" && vars["oid"] != ""
-}
-
-// GetImage from ceph
-func (s *CephImageSource) IndependGetImage(co *CephObject) ([]byte, rados.ObjectStat, error) {
-
-	var buf []byte
-	var stat rados.ObjectStat
-	var err error
-
-	if !s.IsEnable() {
-		return buf, stat, NewError("ceph: service is not supported", Unsupported)
-	}
-
-	if s.UseBlock {
-		if buf, err = ioutil.ReadFile(s.GetBlockPath(co)); err != nil {
-			return nil, stat, err
-		}
-		return buf, stat, nil
-	}
-
-	if buf, err = s.GetAttr(co); err != nil {
-		return nil, stat, err
-	}
-
-	if stat, err = s.GetStat(co); err != nil {
-		// req.Header.Set("Last-Modified", stat.ModTime.String())
-		return nil, stat, err
-	}
-
-	return buf, stat, nil
 }
 
 // GetImage from ceph

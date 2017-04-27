@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"testing"
 )
 
@@ -44,19 +43,6 @@ func TestSetImage(t *testing.T) {
 		err := sc.SetAttr(sCephObj, imgTest)
 		if err != nil {
 			t.Fatal("Set Attr to object is fail")
-		}
-	}
-}
-
-func TestGetImage(t *testing.T) {
-	pool := "test"
-	if sc.OnContext(pool) {
-		buf, _, err := sc.IndependGetImage(sCephObj)
-		if err != nil {
-			t.Fatal("Get Attr from object is fail")
-		}
-		if bytes.Compare(buf, imgTest) != 0 {
-			t.Fatal("Get Attr from object is different with original")
 		}
 	}
 }
