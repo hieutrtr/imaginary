@@ -1,28 +1,26 @@
+variables:
+  DIST_NAME: wsm
 before_script:
 - pwd
-- export VERSION=4.4.0
-- export DIST_NAME=imaginary
-
+- export VERSION=$(wsm version)
+- export PACKAGE=$(wsm package)
+- export DIST_NAME=$(wsm dist-name)
+after_script:
+- tree
 stages:
 - dockerize
 - clean
-
 dockerize:
   stage: dockerize
-  image: docker:latest
-  services:
-    - docker:dind
   script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $DOCKER_REGISTRY
-  - docker build -t $DOCKER_REGISTRY/$DOCKER_REPO/$DIST_NAME:$VERSION .
-  - docker push $DOCKER_REGISTRY/$DOCKER_REPO/$DIST_NAME:$VERSION
+  - docker build -t docker.chotot.org/$DIST_NAME:$VERSION .
+  - docker push docker.chotot.org/$DIST_NAME:$VERSION
   tags:
-  - docker
-
+  - shell
 clean:docker:
   stage: clean
   script:
   - docker images
-  - docker rmi -f $DOCKER_REGISTRY/$DOCKER_REPO/$DIST_NAME:$VERSION
+  - docker rmi -f docker.chotot.org/$DIST_NAME:$VERSION
   tags:
-  - docker
+  - shell
