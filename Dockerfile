@@ -33,8 +33,7 @@ RUN go get github.com/tools/godep
 
 WORKDIR $GOPATH/src/imaginary
 ADD . ./
-RUN godep restore
-RUN go build
+RUN go install ./...
 
 # Run the outyet command by default when the container starts.
 ENTRYPOINT ["/go/bin/imaginary"]
