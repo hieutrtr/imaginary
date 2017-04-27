@@ -79,6 +79,7 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
+	fmt.Println("GetImage")
 
 	vars := gorilla.Vars(req)
 	if s.UseBlock {
@@ -86,9 +87,10 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	}
 
 	buf, err := s.GetAttr(BindObject(vars))
-	req.Header.Set("cached", DATA)
 	if err != nil {
-		return nil, err
+		if buf, err = ioutil.ReadFile("./fixtures/default_avatar.png"); err != nil {
+			return nil, NewError(err.Error(), InternalError)
+		}
 	}
 
 	if stat, err := s.GetStat(BindObject(vars)); err == nil {
