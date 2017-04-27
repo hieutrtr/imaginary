@@ -15,8 +15,6 @@ func TestConnect(t *testing.T) {
 		CephConfig: CephConfig{
 			ConfigPath: "/etc/ceph/ceph.conf",
 			Enable:     true,
-			UseBlock:   false,
-			BlockURL:   "",
 		},
 	}
 	err := c.Connect()

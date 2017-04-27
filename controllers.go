@@ -40,29 +40,55 @@ func healthController(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func UploadImage(req *http.Request, buf []byte) {
-	var connection = MatchConnection(req)
-	if connection == nil {
-		LoggerError.Println(ErrMissingConnection)
-		return
-	}
+func imageController(o ServerOptions, operation Operation) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		getCachedImage := func() []byte {
+			return nil
+		}
 
-	err := connection.Execute(req, buf)
-	if err != nil {
-		LoggerError.Println(NewError(err.Error(), BadRequest))
-		return
-	}
-}
+		getImage := func() []byte {
+			var imageSource = MatchSource(req)
+			if imageSource == nil {
+				ErrorReply(req, w, ErrMissingImageSource, o)
+				return nil
+			}
 
-func getCacheAttr(urlPath, rawQuery string) string {
-	parts := strings.Split(urlPath, "/")
-	for _, a := range cachedAttributes {
-		if a == parts[len(parts)-1] {
-			attr := fmt.Sprintf("%s_%s", a, rawQuery)
-			return attr
+			buf, err := imageSource.GetImage(req)
+			if err != nil {
+				ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+				return nil
+			}
+
+			if len(buf) == 0 {
+				ErrorReply(req, w, ErrEmptyBody, o)
+				return nil
+			}
+			setResponseHeader(w, req)
+			return buf
+		}
+
+		switch routingRequest(req) {
+		case UPLOAD:
+			if buf := getImage(); buf != nil {
+				if err := uploadImage(req, buf); err != nil {
+					ErrorReply(req, w, NewError(err.Error(), InternalError), o)
+				}
+				imageHandler(w, req, buf, Info, o)
+			}
+		case CACHE:
+			if buf := getCachedImage(); buf != nil {
+				imageHandler(w, req, buf, operation, o)
+			} else {
+				if buf := getImage(); buf != nil {
+					imageHandler(w, req, buf, operation, o)
+				}
+			}
+		case PROCESS:
+			if buf := getImage(); buf != nil {
+				imageHandler(w, req, buf, operation, o)
+			}
 		}
 	}
-	return DATA
 }
 
 func routingRequest(req *http.Request) int {
@@ -76,57 +102,39 @@ func routingRequest(req *http.Request) int {
 	return CACHE
 }
 
-func imageRouting(req *http.Request, buf []byte) string {
-	if checkSupportedMediaType(buf) {
-		if IsUploadRequest(req) {
-			return "upload"
-		}
-		if req.Header.Get("cached") == "" {
-			return "cache"
-		} else if req.Header.Get("cached") == DATA {
-			return "process"
-		}
-		return "origin"
+// IsUploadRequest check if request is for uploading an image
+func IsUploadRequest(r *http.Request) bool {
+	if r.Method == "POST" && strings.HasPrefix(r.URL.RequestURI(), "/upload/") {
+		return true
 	}
-	return ""
+	return false
 }
 
-func imageController(o ServerOptions, operation Operation) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		var imageSource = MatchSource(req)
-		if imageSource == nil {
-			ErrorReply(req, w, ErrMissingImageSource, o)
-			return
-		}
+// IsPublic check if request is for uploading an image
+func IsPublic(r *http.Request) bool {
+	if r.Method == "GET" && strings.HasPrefix(r.URL.RequestURI(), "/public/") {
+		return true
+	}
+	return false
+}
 
-		buf, err := imageSource.GetImage(req)
-		if err != nil {
-			ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
-			return
-		}
-
-		if len(buf) == 0 {
-			ErrorReply(req, w, ErrEmptyBody, o)
-			return
-		}
-		setResponseHeader(w, req)
-
-		switch imageRouting(req, buf) {
-		case "upload":
-			imageHandler(w, req, buf, Info, o)
-			UploadImage(req, buf)
-		case "cache":
-			uploadedBuf := imageHandler(w, req, buf, operation, o)
-			req.Method = "POST"
-			UploadImage(req, uploadedBuf)
-		case "process":
-			imageHandler(w, req, buf, operation, o)
-		case "origin":
-			imageHandler(w, req, buf, Origin, o)
-		case "":
-			ErrorReply(req, w, ErrUnsupportedMedia, o)
+func getCacheAttr(urlPath, rawQuery string) string {
+	parts := strings.Split(urlPath, "/")
+	for _, a := range cachedAttributes {
+		if a == parts[len(parts)-1] {
+			attr := fmt.Sprintf("%s_%s", a, rawQuery)
+			return attr
 		}
 	}
+	return DATA
+}
+
+func uploadImage(req *http.Request, buf []byte) error {
+	var connection = MatchConnection(req)
+	if connection == nil {
+		return ErrMissingConnection
+	}
+	return connection.Execute(req, buf)
 }
 
 func checkSupportedMediaType(buf []byte) bool {
@@ -158,22 +166,6 @@ func setResponseHeader(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("Etag", etag)
 		}
 	}
-}
-
-// IsUploadRequest check if request is for uploading an image
-func IsUploadRequest(r *http.Request) bool {
-	if r.Method == "POST" && strings.HasPrefix(r.URL.RequestURI(), "/upload/") {
-		return true
-	}
-	return false
-}
-
-// IsPublic check if request is for uploading an image
-func IsPublic(r *http.Request) bool {
-	if r.Method == "GET" && strings.HasPrefix(r.URL.RequestURI(), "/public/") {
-		return true
-	}
-	return false
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request, buf []byte, operation Operation, o ServerOptions) []byte {
