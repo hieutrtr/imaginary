@@ -48,13 +48,11 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if !s.IsEnable() {
 		return nil, NewError("ceph: service is not supported", Unsupported)
 	}
-	fmt.Println("GetImage")
 
 	vars := gorilla.Vars(req)
 	if s.UseBlock {
 		return ioutil.ReadFile(s.GetBlockPath(BindObject(vars)))
 	}
-
 	buf, err := s.GetAttr(BindObject(vars))
 	if err != nil {
 		if buf, err = getDefault(vars["service"]); err != nil {
