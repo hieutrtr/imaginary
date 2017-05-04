@@ -55,24 +55,13 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	}
 	buf, err := s.GetAttr(BindObject(vars))
 	if err != nil {
-		if buf, err = getDefault(vars["service"]); err != nil {
-			return nil, NewError(err.Error(), InternalError)
-		}
+		return nil, NewError(err.Error(), InternalError)
 	}
 
 	if stat, err := s.GetStat(BindObject(vars)); err == nil {
 		req.Header.Set("Last-Modified", stat.ModTime.String())
 	}
 	return buf, err
-}
-
-func getDefault(service string) ([]byte, error) {
-	switch service {
-	case "profile_avatar":
-		return ioutil.ReadFile("./fixtures/default_avatar.png")
-	default:
-		return nil, NewError("Ceph: Image is not exist", InternalError)
-	}
 }
 
 func init() {

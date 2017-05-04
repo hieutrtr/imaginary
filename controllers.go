@@ -4,11 +4,14 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"gopkg.in/h2non/bimg.v1"
 	"gopkg.in/h2non/filetype.v0"
+
+	gorilla "github.com/gorilla/mux"
 )
 
 const (
@@ -55,7 +58,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 
 			buf, err := imageSource.GetImage(req)
 			if err != nil {
-				ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
 				return nil
 			}
 
@@ -67,6 +69,7 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			return buf
 		}
 
+		vars := gorilla.Vars(req)
 		switch routingRequest(req) {
 		case UPLOAD:
 			if buf := getImage(); buf != nil {
@@ -77,17 +80,40 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			}
 		case CACHE:
 			if buf := getCachedImage(); buf != nil {
-				imageHandler(w, req, buf, operation, o)
+				imageHandler(w, req, buf, Origin, o)
 			} else {
 				if buf := getImage(); buf != nil {
 					imageHandler(w, req, buf, operation, o)
+				} else {
+					var err error
+					if buf, err = getDefault(vars["service"]); err != nil {
+						ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+					} else {
+						imageHandler(w, req, buf, Origin, o)
+					}
 				}
 			}
 		case PROCESS:
 			if buf := getImage(); buf != nil {
 				imageHandler(w, req, buf, operation, o)
+			} else {
+				var err error
+				if buf, err = getDefault(vars["service"]); err != nil {
+					ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+				} else {
+					imageHandler(w, req, buf, Origin, o)
+				}
 			}
 		}
+	}
+}
+
+func getDefault(service string) ([]byte, error) {
+	switch service {
+	case "profile_avatar":
+		return ioutil.ReadFile("./fixtures/default_avatar.png")
+	default:
+		return nil, NewError("Ceph: Image is not exist", InternalError)
 	}
 }
 
