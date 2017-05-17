@@ -30,6 +30,10 @@ func (s *BodyImageSource) GetImage(r *http.Request) ([]byte, error) {
 	return readRawBody(r)
 }
 
+func (s *BodyImageSource) GetCache(r *http.Request) ([]byte, error) {
+	return nil, nil
+}
+
 func isFormBody(r *http.Request) bool {
 	return strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/")
 }

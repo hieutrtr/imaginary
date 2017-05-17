@@ -28,6 +28,7 @@ var imageSourceFactoryMap = make(map[ImageSourceType]ImageSourceFactoryFunction)
 type ImageSource interface {
 	Matches(*http.Request) bool
 	GetImage(*http.Request) ([]byte, error)
+	GetCache(*http.Request) ([]byte, error)
 }
 
 func RegisterSource(sourceType ImageSourceType, factory ImageSourceFactoryFunction) {

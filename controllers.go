@@ -45,17 +45,27 @@ func healthController(w http.ResponseWriter, r *http.Request) {
 
 func imageController(o ServerOptions, operation Operation) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		getCachedImage := func() []byte {
+		var imageSource = MatchSource(req)
+		if imageSource == nil {
+			ErrorReply(req, w, ErrMissingImageSource, o)
 			return nil
 		}
 
-		getImage := func() []byte {
-			var imageSource = MatchSource(req)
-			if imageSource == nil {
-				ErrorReply(req, w, ErrMissingImageSource, o)
+		getCachedImage := func() []byte {
+			buf, err := imageSource.GetCache(req)
+			if err != nil {
 				return nil
 			}
 
+			if len(buf) == 0 {
+				ErrorReply(req, w, ErrEmptyBody, o)
+				return nil
+			}
+			setResponseHeader(w, req)
+			return buf
+		}
+
+		getImage := func() []byte {
 			buf, err := imageSource.GetImage(req)
 			if err != nil {
 				return nil
@@ -148,8 +158,8 @@ func getCacheAttr(urlPath, rawQuery string) string {
 	parts := strings.Split(urlPath, "/")
 	for _, a := range cachedAttributes {
 		if a == parts[len(parts)-1] {
-			attr := fmt.Sprintf("%s_%s", a, rawQuery)
-			return attr
+			// attr := fmt.Sprintf("%s_%s", a, rawQuery)
+			return a
 		}
 	}
 	return DATA

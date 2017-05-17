@@ -39,6 +39,10 @@ func (s *S3ImageSource) GetImage(req *http.Request) ([]byte, error) {
 	return s.GetData()
 }
 
+func (s *S3ImageSource) GetCache(r *http.Request) ([]byte, error) {
+	return nil, nil
+}
+
 func init() {
 	RegisterSource(ImageSourceTypeS3, NewS3ImageSource)
 }

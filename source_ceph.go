@@ -64,6 +64,27 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	return buf, err
 }
 
+// GetImage from ceph
+func (s *CephImageSource) GetCache(req *http.Request) ([]byte, error) {
+	if !s.IsEnable() {
+		return nil, NewError("ceph: service is not supported", Unsupported)
+	}
+
+	vars := gorilla.Vars(req)
+	if s.UseBlock {
+		return ioutil.ReadFile(s.GetBlockPath(BindObject(vars)))
+	}
+	buf, err := s.GetAttr(BindRequest(req))
+	if err != nil {
+		return nil, NewError(err.Error(), InternalError)
+	}
+
+	if stat, err := s.GetStat(BindObject(vars)); err == nil {
+		req.Header.Set("Last-Modified", stat.ModTime.String())
+	}
+	return buf, err
+}
+
 func init() {
 	RegisterSource(ImageSourceTypeCeph, NewCephImageSource)
 }
