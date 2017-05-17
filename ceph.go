@@ -175,7 +175,6 @@ func (c *Ceph) OpenContext(Pool string) error {
 func BindRequest(req *http.Request) *CephObject {
 	vars := gorilla.Vars(req)
 	attr := getCacheAttr(req.URL.Path, req.URL.RawQuery)
-	fmt.Println("BindRequest", attr)
 	return &CephObject{
 		Pool: vars["service"],
 		OID:  vars["oid"],
