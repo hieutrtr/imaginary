@@ -58,7 +58,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			}
 
 			if len(buf) == 0 {
-				ErrorReply(req, w, ErrEmptyBody, o)
 				return nil
 			}
 			setResponseHeader(w, req)
