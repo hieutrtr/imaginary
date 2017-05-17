@@ -48,7 +48,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 		var imageSource = MatchSource(req)
 		if imageSource == nil {
 			ErrorReply(req, w, ErrMissingImageSource, o)
-			return nil
 		}
 
 		getCachedImage := func() []byte {

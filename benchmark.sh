@@ -15,19 +15,14 @@ pid=$!
 
 suite() {
   echo "$1 --------------------------------------"
-  echo "POST http://localhost:$port/$2" | vegeta attack \
-    -duration=30s \
-    -rate=50 \
-    -body="./fixtures/large.jpg" \ | vegeta report
+  echo "GET http://10.60.6.12:8068/$2" | vegeta attack \
+    -duration=100s \
+    -rate=50 \ | vegeta report
   sleep 1
 }
 
 # Run suites
-suite "Crop" "crop?width=800&height=600"
-suite "Resize" "resize?width=200"
-#suite "Rotate" "rotate?rotate=180"
-#suite "Enlarge" "enlarge?width=1600&height=1200"
-suite "Extract" "extract?top=50&left=50&areawidth=200&areaheight=200"
+suite "Avatar" "profile_avatar/19384"
 
 # Kill the server
 kill -9 $pid

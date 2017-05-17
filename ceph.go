@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
@@ -14,7 +12,7 @@ import (
 
 const (
 	DATA               = "data"
-	IMAGE_MAX_BYTE     = 20971520
+	IMAGE_MAX_BYTE     = 1024 * 1000 * 5
 	CONNECTION_TIMEOUT = 10
 	CTX_TIMEOUT        = 5
 )
@@ -127,8 +125,8 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 			return nil, err
 		}
 	}
-	errSignal := make(chan error, 1)
-	lengSignal := make(chan int, 1)
+	errSignal := make(chan error)
+	lengSignal := make(chan int)
 	data := make([]byte, IMAGE_MAX_BYTE)
 	go func() {
 		if obj.Attr == "" {
@@ -150,9 +148,7 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	case err := <-errSignal:
 		return nil, err
 	case leng := <-lengSignal:
-		buf := bytes.NewBuffer(make([]byte, 0, leng+1))
-		io.Copy(buf, bytes.NewReader(data[:leng]))
-		return buf.Bytes(), nil
+		return data[:leng], nil
 	}
 }
 
