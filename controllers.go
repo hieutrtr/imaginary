@@ -155,7 +155,6 @@ func IsPublic(r *http.Request) bool {
 func getCacheAttr(urlPath, rawQuery string) string {
 	parts := strings.Split(urlPath, "/")
 	for _, a := range cachedAttributes {
-		fmt.Println("rawQuery", rawQuery)
 		if a == parts[len(parts)-1] {
 			if rawQuery != "" {
 				return fmt.Sprintf("%s_%s", a, rawQuery)
