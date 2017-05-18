@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -148,7 +150,9 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	case err := <-errSignal:
 		return nil, err
 	case leng := <-lengSignal:
-		return data[:leng], nil
+		buf := bytes.NewBuffer(make([]byte, 0, leng+1))
+		io.Copy(buf, bytes.NewReader(data[:leng]))
+		return buf.Bytes(), nil
 	}
 }
 
