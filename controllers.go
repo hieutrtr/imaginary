@@ -106,8 +106,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				var err error
 				if buf, err = getDefault(vars["service"]); err != nil {
 					ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
-				} else {
-					imageHandler(w, req, buf, Origin, o)
 				}
 			}
 		}
