@@ -25,6 +25,12 @@ var cachedAttributes = []string{
 	"watermark",
 }
 
+var defaultImgs = make(map[string][]byte)
+
+func init() {
+	defaultImgs["profile_avatar"], _ = ioutil.ReadFile("./fixtures/default_avatar.png")
+}
+
 func indexController(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		ErrorReply(r, w, ErrNotFound, ServerOptions{})
@@ -117,12 +123,10 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 }
 
 func getDefault(service string) ([]byte, error) {
-	switch service {
-	case "profile_avatar":
-		return ioutil.ReadFile("./fixtures/default_avatar.png")
-	default:
-		return nil, NewError("Ceph: Image is not exist", InternalError)
+	if defaultImgs[service] != nil {
+		return defaultImgs[service], nil
 	}
+	return nil, NewError("Ceph: Image is not exist", InternalError)
 }
 
 func routingRequest(req *http.Request) int {
