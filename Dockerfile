@@ -1,6 +1,6 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-FROM hieutrtr/imaginary_base:latest
+FROM docker.chotot.org/imaginary_base:16.04-8.4.2
 
 # Go version to use
 ENV GOLANG_VERSION 1.7.1
@@ -33,8 +33,8 @@ RUN go get github.com/tools/godep
 
 WORKDIR $GOPATH/src/imaginary
 ADD . ./
-RUN godep restore
-RUN go get ./...
+#RUN godep restore
+RUN go install
 
 # Run the outyet command by default when the container starts.
 ENTRYPOINT ["/go/bin/imaginary"]
