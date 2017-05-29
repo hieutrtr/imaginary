@@ -25,10 +25,12 @@ var cachedAttributes = []string{
 	"watermark",
 }
 
-var defaultImgs = make(map[string][]byte)
+var defaultImgs = make(map[string]map[string][]byte)
 
 func init() {
-	defaultImgs["profile_avatar"], _ = ioutil.ReadFile("./fixtures/default_avatar.png")
+	defaultImgs["profile_avatar"] = make(map[string][]byte)
+	defaultImgs["profile_avatar"]["thumbnail_width=160"], _ = ioutil.ReadFile("./fixtures/ic_default_avatar.png")
+	defaultImgs["profile_avatar"]["thumbnail_width=32"], _ = ioutil.ReadFile("./fixtures/default_avatar.png")
 }
 
 func indexController(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +86,8 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 		}
 
 		vars := gorilla.Vars(req)
-		switch routingRequest(req) {
+		route, attribute := routingRequest(req)
+		switch route {
 		case UPLOAD:
 			if buf := getImage(); buf != nil {
 				if err := uploadImage(req, buf); err != nil {
@@ -100,7 +103,7 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				if buf = getImage(); buf != nil {
 					imageHandler(w, req, buf, operation, o)
 				} else {
-					if buf = defaultImgs[vars["service"]]; buf == nil {
+					if buf = defaultImgs[vars["service"]][attribute]; buf == nil {
 						ErrorReply(req, w, NewError("Ceph: Image is not exist", InternalError), o)
 					} else {
 						imageHandler(w, req, buf, Origin, o)
@@ -112,7 +115,7 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			if buf = getImage(); buf != nil {
 				imageHandler(w, req, buf, operation, o)
 			} else {
-				if buf = defaultImgs[vars["service"]]; buf == nil {
+				if buf = defaultImgs[vars["service"]][attribute]; buf == nil {
 					ErrorReply(req, w, NewError("Ceph: Image is not exist", InternalError), o)
 				} else {
 					imageHandler(w, req, buf, Origin, o)
@@ -122,22 +125,15 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 	}
 }
 
-func getDefault(service string) ([]byte, error) {
-	if defaultImgs[service] != nil {
-		return defaultImgs[service], nil
-	}
-	return nil, NewError("Ceph: Image is not exist", InternalError)
-}
-
-func routingRequest(req *http.Request) int {
+func routingRequest(req *http.Request) (int, string) {
 	if IsUploadRequest(req) {
-		return UPLOAD
+		return UPLOAD, ""
 	}
 	attr := getCacheAttr(req.URL.Path, req.URL.RawQuery)
 	if attr == DATA {
-		return PROCESS
+		return PROCESS, attr
 	}
-	return CACHE
+	return CACHE, attr
 }
 
 // IsUploadRequest check if request is for uploading an image
