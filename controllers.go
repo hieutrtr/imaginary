@@ -93,27 +93,27 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				imageHandler(w, req, buf, Info, o)
 			}
 		case CACHE:
-			if buf := getCachedImage(); buf != nil {
+			var buf []byte
+			if buf = getCachedImage(); buf != nil {
 				imageHandler(w, req, buf, Origin, o)
 			} else {
-				if buf := getImage(); buf != nil {
+				if buf = getImage(); buf != nil {
 					imageHandler(w, req, buf, operation, o)
 				} else {
-					var err error
-					if buf, err = getDefault(vars["service"]); err != nil {
-						ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+					if buf = defaultImgs[vars["service"]]; buf == nil {
+						ErrorReply(req, w, NewError("Ceph: Image is not exist", InternalError), o)
 					} else {
 						imageHandler(w, req, buf, Origin, o)
 					}
 				}
 			}
 		case PROCESS:
-			if buf := getImage(); buf != nil {
+			var buf []byte
+			if buf = getImage(); buf != nil {
 				imageHandler(w, req, buf, operation, o)
 			} else {
-				var err error
-				if buf, err = getDefault(vars["service"]); err != nil {
-					ErrorReply(req, w, NewError(err.Error(), BadRequest), o)
+				if buf = defaultImgs[vars["service"]]; buf == nil {
+					ErrorReply(req, w, NewError("Ceph: Image is not exist", InternalError), o)
 				} else {
 					imageHandler(w, req, buf, Origin, o)
 				}
