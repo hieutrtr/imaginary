@@ -21,7 +21,6 @@ _cgo_export.*
 
 _testmain.go
 
-/dist
 *.exe
 *.test
 bin/
