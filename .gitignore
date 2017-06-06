@@ -23,15 +23,11 @@ _testmain.go
 
 *.exe
 *.test
-bin/
 .vagrant/
 
 *.old
 *.attr
 *.swp
-
-imaginary
-bin/imaginary
 
 ## ignore vendor packages
 vendor/
