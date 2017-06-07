@@ -73,6 +73,12 @@ func (c *Ceph) IsEnable() bool {
 
 // DelObj delete an object from ceph
 func (c *Ceph) DelObj(obj *CephObject) error {
+	if !c.OnContext(obj.Pool) {
+		err := c.OpenContext(obj.Pool)
+		if err != nil {
+			return err
+		}
+	}
 	errSignal := make(chan error, 1)
 	go func() {
 		errSignal <- c.Context[obj.Pool].Delete(obj.OID)
