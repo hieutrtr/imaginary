@@ -37,6 +37,10 @@ func (s *HttpImageSource) GetCache(r *http.Request) ([]byte, error) {
 	return nil, nil
 }
 
+func (s *HttpImageSource) Delete(r *http.Request) error {
+	return nil
+}
+
 func (s *HttpImageSource) fetchImage(url *url.URL, ireq *http.Request) ([]byte, error) {
 	// Check remote image size by fetching HTTP Headers
 	if s.Config.MaxAllowedSize > 0 {

@@ -29,6 +29,7 @@ type ImageSource interface {
 	Matches(*http.Request) bool
 	GetImage(*http.Request) ([]byte, error)
 	GetCache(*http.Request) ([]byte, error)
+	Delete(*http.Request) error
 }
 
 func RegisterSource(sourceType ImageSourceType, factory ImageSourceFactoryFunction) {

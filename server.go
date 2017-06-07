@@ -95,6 +95,7 @@ func NewServerMux(o ServerOptions) http.Handler {
 
 	image := ImageMiddleware(o)
 	mux.Handle(join(o, "/upload/{service}/{oid}"), image(Info))
+	mux.Handle(join(o, "/delete/{service}/{oid}"), image(Info))
 	mux.Handle(joinImageRoute(o, "/"), image(Origin))
 	mux.Handle(joinImageRoute(o, "/resize"), image(Resize))
 	mux.Handle(joinImageRoute(o, "/enlarge"), image(Enlarge))

@@ -39,6 +39,10 @@ func (s *FileSystemImageSource) GetCache(r *http.Request) ([]byte, error) {
 	return nil, nil
 }
 
+func (s *FileSystemImageSource) Delete(r *http.Request) error {
+	return nil
+}
+
 func (s *FileSystemImageSource) buildPath(file string) (string, error) {
 	file = path.Clean(path.Join(s.Config.MountPath, file))
 	if strings.HasPrefix(file, s.Config.MountPath) == false {

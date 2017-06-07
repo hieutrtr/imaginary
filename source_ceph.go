@@ -40,7 +40,7 @@ func NewCephImageSource(config *SourceConfig) ImageSource {
 
 func (s *CephImageSource) Matches(r *http.Request) bool {
 	vars := gorilla.Vars(r)
-	return r.Method == "GET" && vars["service"] != "" && vars["oid"] != ""
+	return (r.Method == "DELETE" || r.Method == "GET") && vars["service"] != "" && vars["oid"] != ""
 }
 
 // GetImage from ceph
@@ -83,6 +83,14 @@ func (s *CephImageSource) GetCache(req *http.Request) ([]byte, error) {
 		req.Header.Set("Last-Modified", stat.ModTime.String())
 	}
 	return buf, err
+}
+
+// Delete from ceph
+func (s *CephImageSource) Delete(req *http.Request) error {
+	if !s.IsEnable() {
+		return NewError("ceph: service is not supported", Unsupported)
+	}
+	return s.DelObj(BindRequest(req))
 }
 
 func init() {

@@ -18,6 +18,7 @@ const (
 	UPLOAD int = iota
 	CACHE
 	PROCESS
+	DELETE
 )
 
 var cachedAttributes = []string{
@@ -88,6 +89,11 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 		vars := gorilla.Vars(req)
 		route, attribute := routingRequest(req)
 		switch route {
+		case DELETE:
+			if err := imageSource.Delete(req); err != nil {
+				ErrorReply(req, w, NewError(err.Error(), InternalError), o)
+			}
+			w.Write([]byte("Image is deleted successfully"))
 		case UPLOAD:
 			if buf := getImage(); buf != nil {
 				if err := uploadImage(req, buf); err != nil {
@@ -129,11 +135,22 @@ func routingRequest(req *http.Request) (int, string) {
 	if IsUploadRequest(req) {
 		return UPLOAD, ""
 	}
+	if IsDeleteRequest(req) {
+		return DELETE, ""
+	}
 	attr := getCacheAttr(req.URL.Path, req.URL.RawQuery)
 	if attr == DATA {
 		return PROCESS, attr
 	}
 	return CACHE, attr
+}
+
+// IsDeleteRequest check if request is for deleting an image
+func IsDeleteRequest(r *http.Request) bool {
+	if r.Method == "DELETE" && strings.HasPrefix(r.URL.RequestURI(), "/delete/") {
+		return true
+	}
+	return false
 }
 
 // IsUploadRequest check if request is for uploading an image
