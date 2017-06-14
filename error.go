@@ -34,6 +34,7 @@ var (
 	ErrMissingImageSource = NewError("Cannot process the image from source due to missing or invalid params", BadRequest)
 	ErrMissingConnection  = NewError("Ceph connection issue", BadRequest)
 	ErrSafeHash           = NewError("Unsafe request", BadRequest)
+	ErrServer             = NewError("Server Error", InternalError)
 	LoggerInfo            = log.New(os.Stdout, "INFO:", log.LstdFlags)
 	LoggerError           = log.New(os.Stdout, "ERROR:", log.LstdFlags)
 	LoggerDebug           = log.New(os.Stdout, "DEBUG:", log.LstdFlags)

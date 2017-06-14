@@ -86,6 +86,13 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			return buf
 		}
 
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Println("Recovered in imageController", r)
+				ErrorReply(req, w, ErrServer, o)
+			}
+		}()
+
 		vars := gorilla.Vars(req)
 		route, attribute := routingRequest(req)
 		switch route {
