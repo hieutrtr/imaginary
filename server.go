@@ -50,7 +50,9 @@ func Server(o ServerOptions) error {
 	addr := o.Address + ":" + strconv.Itoa(o.Port)
 	mux := NewLog(NewServerMux(o), os.Stdout)
 	handler := negroni.New()
-	handler.Use(negroni.NewRecovery())
+	recovery := negroni.NewRecovery()
+	recovery.PrintStack = false
+	handler.Use(recovery)
 	handler.UseHandler(mux)
 	server := &http.Server{
 		Addr:           addr,
