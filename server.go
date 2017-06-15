@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/urfave/negroni"
+
 	gorilla "github.com/gorilla/mux"
 )
 
@@ -46,8 +48,10 @@ type ServerOptions struct {
 
 func Server(o ServerOptions) error {
 	addr := o.Address + ":" + strconv.Itoa(o.Port)
-	handler := NewLog(NewServerMux(o), os.Stdout)
-
+	mux := NewLog(NewServerMux(o), os.Stdout)
+	handler := negroni.New()
+	handler.Use(negroni.NewRecovery())
+	handler.UseHandler(mux)
 	server := &http.Server{
 		Addr:           addr,
 		Handler:        handler,
