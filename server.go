@@ -8,8 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/urfave/negroni"
-
+	ghadlers "github.com/gorilla/handlers"
 	gorilla "github.com/gorilla/mux"
 )
 
@@ -49,14 +48,9 @@ type ServerOptions struct {
 func Server(o ServerOptions) error {
 	addr := o.Address + ":" + strconv.Itoa(o.Port)
 	mux := NewLog(NewServerMux(o), os.Stdout)
-	handler := negroni.New()
-	recovery := negroni.NewRecovery()
-	recovery.PrintStack = false
-	handler.Use(recovery)
-	handler.UseHandler(mux)
 	server := &http.Server{
 		Addr:           addr,
-		Handler:        handler,
+		Handler:        ghadlers.RecoveryHandler()(mux),
 		MaxHeaderBytes: 1 << 20,
 		ReadTimeout:    time.Duration(o.HttpReadTimeout) * time.Second,
 		WriteTimeout:   time.Duration(o.HttpWriteTimeout) * time.Second,
