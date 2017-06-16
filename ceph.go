@@ -112,11 +112,7 @@ func (c *Ceph) SetAttr(obj *CephObject, buf []byte) error {
 			LoggerInfo.Println("cache Object's attribute", obj)
 		}
 
-		if err := c.Context[obj.Pool].RmXattr(obj.OID, obj.Attr); err != nil {
-			errSignal <- err
-		} else {
-			errSignal <- c.Context[obj.Pool].SetXattr(obj.OID, obj.Attr, buf)
-		}
+		errSignal <- c.Context[obj.Pool].SetXattr(obj.OID, obj.Attr, buf)
 	}()
 
 	select {
