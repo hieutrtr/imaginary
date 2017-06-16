@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/noahdesu/go-ceph/rados"
+	"github.com/ceph/go-ceph/rados"
 
 	gorilla "github.com/gorilla/mux"
 )
