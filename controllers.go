@@ -183,6 +183,9 @@ func getCacheAttr(urlPath, rawQuery string) string {
 }
 
 func uploadImage(req *http.Request, buf []byte) error {
+	if len(buf) > *aMaxAllowedSize {
+		return NewError(fmt.Sprintf("Image reach buffer's limit %d", *aMaxAllowedSize), 1)
+	}
 	var connection = MatchConnection(req)
 	if connection == nil {
 		return ErrMissingConnection

@@ -35,7 +35,7 @@ var (
 	aEnableURLSource   = flag.Bool("enable-url-source", false, "Enable remote HTTP URL image source processing")
 	aEnablePlaceholder = flag.Bool("enable-placeholder", false, "Enable image response placeholder to be used in case of error")
 	aAlloweOrigins     = flag.String("allowed-origins", "", "Restrict remote image source processing to certain origins (separated by commas)")
-	aMaxAllowedSize    = flag.Int("max-allowed-size", 0, "Restrict maximum size of http image source (in bytes)")
+	aMaxAllowedSize    = flag.Int("max-allowed-size", 1024*1000*5, "Restrict maximum size of http image source (in bytes)")
 	aKey               = flag.String("key", "", "Define API key for authorization")
 	aMount             = flag.String("mount", "", "Mount server local directory")
 	aCertFile          = flag.String("certfile", "", "TLS certificate file path")

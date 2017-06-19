@@ -14,7 +14,6 @@ import (
 
 const (
 	DATA               = "data"
-	IMAGE_MAX_BYTE     = 1024 * 1000 * 5
 	CONNECTION_TIMEOUT = 10
 	CTX_TIMEOUT        = 5
 )
@@ -136,7 +135,7 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	}
 	errSignal := make(chan error)
 	lengSignal := make(chan int)
-	data := make([]byte, IMAGE_MAX_BYTE)
+	data := make([]byte, *aMaxAllowedSize)
 	go func() {
 		if obj.Attr == "" {
 			obj.Attr = DATA
