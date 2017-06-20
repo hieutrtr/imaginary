@@ -50,7 +50,7 @@ func Server(o ServerOptions) error {
 	mux := NewLog(NewServerMux(o), os.Stdout)
 	server := &http.Server{
 		Addr:           addr,
-		Handler:        ghadlers.RecoveryHandler()(mux),
+		Handler:        ghadlers.RecoveryHandler(ghadlers.PrintRecoveryStack(true))(mux),
 		MaxHeaderBytes: 1 << 20,
 		ReadTimeout:    time.Duration(o.HttpReadTimeout) * time.Second,
 		WriteTimeout:   time.Duration(o.HttpWriteTimeout) * time.Second,
