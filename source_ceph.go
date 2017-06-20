@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -46,7 +47,7 @@ func (s *CephImageSource) Matches(r *http.Request) bool {
 // GetImage from ceph
 func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	if !s.IsEnable() {
-		return nil, NewError("ceph: service is not supported", Unsupported)
+		return nil, errors.New("ceph: service is not supported")
 	}
 
 	vars := gorilla.Vars(req)
@@ -55,7 +56,7 @@ func (s *CephImageSource) GetImage(req *http.Request) ([]byte, error) {
 	}
 	buf, err := s.GetAttr(BindObject(vars))
 	if err != nil {
-		return nil, NewError(err.Error(), InternalError)
+		return nil, err
 	}
 
 	if stat, err := s.GetStat(BindObject(vars)); err == nil {

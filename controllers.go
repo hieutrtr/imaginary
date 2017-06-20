@@ -79,7 +79,6 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 			}
 
 			if len(buf) == 0 {
-				ErrorReply(req, w, ErrEmptyBody, o)
 				return nil
 			}
 			setResponseHeader(w, req)
@@ -96,7 +95,7 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				w.Write([]byte("Image is deleted successfully"))
 			}
 		case UPLOAD:
-			if buf := getImage(); buf != nil {
+			if buf := getImage(); buf != nil { // Get image from client for uploading to ceph
 				if err := uploadImage(req, buf); err.Error() != "" {
 					ErrorReply(req, w, err, o)
 				} else {
