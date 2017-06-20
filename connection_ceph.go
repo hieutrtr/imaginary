@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -47,7 +48,7 @@ func (c *CephConnection) Matches(r *http.Request) bool {
 func (c *CephConnection) Execute(req *http.Request, buf []byte) error {
 	// var err error
 	if !c.IsEnable() {
-		return NewError("ceph: service is not supported", Unsupported)
+		return errors.New("ceph: service is not supported")
 	}
 
 	vars := gorilla.Vars(req)
@@ -55,13 +56,6 @@ func (c *CephConnection) Execute(req *http.Request, buf []byte) error {
 	if c.UseBlock {
 		return ioutil.WriteFile(c.GetBlockPath(BindObject(vars)), buf, 0644)
 	}
-
-	// Clear object before update original data
-	// if c.Attr == DATA {
-	// 	if err = c.DelObj(BindObject(vars)); err != nil {
-	// 		LoggerInfo.Println("WARNING: No object match with", c.CephObject, "to delete with reason", err)
-	// 	}
-	// }
 
 	return c.SetAttr(BindObject(vars), buf)
 }

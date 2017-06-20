@@ -92,14 +92,16 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 		case DELETE:
 			if err := imageSource.Delete(req); err != nil {
 				ErrorReply(req, w, NewError(err.Error(), InternalError), o)
+			} else {
+				w.Write([]byte("Image is deleted successfully"))
 			}
-			w.Write([]byte("Image is deleted successfully"))
 		case UPLOAD:
 			if buf := getImage(); buf != nil {
-				if err := uploadImage(req, buf); err != nil {
-					ErrorReply(req, w, NewError(err.Error(), InternalError), o)
+				if err := uploadImage(req, buf); err.Error() != "" {
+					ErrorReply(req, w, err, o)
+				} else {
+					imageHandler(w, req, buf, Info, o)
 				}
-				imageHandler(w, req, buf, Info, o)
 			}
 		case CACHE:
 			var buf []byte
@@ -110,7 +112,7 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 					imageHandler(w, req, buf, operation, o)
 				} else {
 					if buf = defaultImgs[vars["service"]][attribute]; buf == nil {
-						ErrorReply(req, w, NewError("Ceph: Image is not exist", InternalError), o)
+						ErrorReply(req, w, NewError("Ceph: Image is not exist", BadRequest), o)
 					} else {
 						imageHandler(w, req, buf, Origin, o)
 					}
@@ -122,7 +124,7 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				imageHandler(w, req, buf, operation, o)
 			} else {
 				if buf = defaultImgs[vars["service"]][attribute]; buf == nil {
-					ErrorReply(req, w, NewError("Ceph: Image is not exist", InternalError), o)
+					ErrorReply(req, w, NewError("Ceph: Image is not exist", BadRequest), o)
 				} else {
 					imageHandler(w, req, buf, Origin, o)
 				}
@@ -182,7 +184,7 @@ func getCacheAttr(urlPath, rawQuery string) string {
 	return DATA
 }
 
-func uploadImage(req *http.Request, buf []byte) error {
+func uploadImage(req *http.Request, buf []byte) Error {
 	if len(buf) > *aMaxAllowedSize {
 		return NewError(fmt.Sprintf("Image reach buffer's limit %d", *aMaxAllowedSize), 1)
 	}
@@ -190,7 +192,10 @@ func uploadImage(req *http.Request, buf []byte) error {
 	if connection == nil {
 		return ErrMissingConnection
 	}
-	return connection.Execute(req, buf)
+	if err := connection.Execute(req, buf); err != nil {
+		return NewError(err.Error(), InternalError)
+	}
+	return Error{}
 }
 
 func checkSupportedMediaType(buf []byte) bool {
