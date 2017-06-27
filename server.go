@@ -10,6 +10,7 @@ import (
 
 	ghadlers "github.com/gorilla/handlers"
 	gorilla "github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type ServerOptions struct {
@@ -109,6 +110,7 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(joinImageRoute(o, "/convert"), image(Convert))
 	mux.Handle(joinImageRoute(o, "/watermark"), image(Watermark))
 	mux.Handle(joinImageRoute(o, "/info"), image(Info))
+	mux.Handle("/metrics", promhttp.Handler)
 
 	return mux
 }
