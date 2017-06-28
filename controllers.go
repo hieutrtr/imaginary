@@ -108,6 +108,10 @@ func imageController(o ServerOptions, operation Operation) func(http.ResponseWri
 				imageHandler(w, req, buf, Origin, o)
 			} else {
 				if buf = getImage(); buf != nil {
+					// Work around cannot process gif
+					q := req.URL.Query()
+					q.Add("type", "jpeg")
+					req.URL.RawQuery = q.Encode()
 					imageHandler(w, req, buf, operation, o)
 				} else {
 					if buf = defaultImgs[vars["service"]][attribute]; buf == nil {
