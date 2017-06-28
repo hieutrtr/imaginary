@@ -110,7 +110,7 @@ func NewServerMux(o ServerOptions) http.Handler {
 	mux.Handle(joinImageRoute(o, "/convert"), image(Convert))
 	mux.Handle(joinImageRoute(o, "/watermark"), image(Watermark))
 	mux.Handle(joinImageRoute(o, "/info"), image(Info))
-	mux.Handle("/metrics", promhttp.Handler)
+	mux.Handle("/metrics", promhttp.Handler())
 
 	return mux
 }
