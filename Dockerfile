@@ -1,6 +1,6 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-FROM docker.chotot.org/imaginary_base:14.04-8.4.2
+FROM docker.chotot.org/imaginary_base:16.04-8.4.2
 
 # Go version to use
 ENV GOLANG_VERSION 1.7.1
