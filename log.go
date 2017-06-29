@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const formatPattern = "%s - - [%s] \"%s\" %d %d %.4f\n"
@@ -53,6 +55,21 @@ func NewLog(handler http.Handler, io io.Writer) http.Handler {
 	return &LogHandler{handler, io}
 }
 
+var histVec *prometheus.HistogramVec
+
+func init() {
+	histVec = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Subsystem: "imaginary",
+			Name:      "request_duration_seconds",
+			Help:      "The HTTP request latencies in seconds.",
+			Buckets:   []float64{.005, .01, .02, 0.04, .06, 0.08, .1, 0.15, .25, 0.4, .6, .8, 1, 1.5, 2, 3, 5},
+		},
+		[]string{"code", "action"},
+	)
+	prometheus.MustRegister(histVec)
+}
+
 // Implementes the required method as standard HTTP handler, serving the request.
 func (h *LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	clientIP := r.RemoteAddr
@@ -77,6 +94,14 @@ func (h *LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	record.time = finishTime.UTC()
 	record.elapsedTime = finishTime.Sub(startTime)
+
+	pathSegs := strings.Split(r.URL.Path, "/")
+
+	if len(pathSegs) == 4 {
+		// Do tracking prometheus for action
+		action := r.Method + "_" + pathSegs[3]
+		histVec.WithLabelValues(record.status, action).Observe(float64(record.elapsedTime))
+	}
 
 	record.Log(h.io)
 }
