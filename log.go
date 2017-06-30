@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -105,7 +106,7 @@ func (h *LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(pathSegs) == 4 {
 		// Do tracking prometheus for action
 		action := r.Method + "_" + pathSegs[3]
-		histVec.WithLabelValues(record.status, action).Observe(float64(record.elapsedTime))
+		histVec.WithLabelValues(strconv.Itoa(record.status), action).Observe(float64(record.elapsedTime))
 	}
 
 	record.Log(h.io)

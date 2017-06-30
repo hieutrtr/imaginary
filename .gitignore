@@ -30,6 +30,5 @@ _testmain.go
 *.swp
 
 ## ignore vendor packages
-vendor/
 glide.lock
 .remote-sync.json
