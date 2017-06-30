@@ -95,7 +95,12 @@ func (h *LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	record.time = finishTime.UTC()
 	record.elapsedTime = finishTime.Sub(startTime)
 
-	pathSegs := strings.Split(r.URL.Path, "/")
+	pathSegs := []string{}
+	for _, seg := range strings.Split(r.URL.Path, "/") {
+		if len(seg) > 0 {
+			pathSegs = append(pathSegs, seg)
+		}
+	}
 
 	if len(pathSegs) == 4 {
 		// Do tracking prometheus for action
