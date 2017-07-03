@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"net/url"
 	"os"
 	"path"
@@ -56,7 +58,9 @@ func Server(o ServerOptions) error {
 		ReadTimeout:    time.Duration(o.HttpReadTimeout) * time.Second,
 		WriteTimeout:   time.Duration(o.HttpWriteTimeout) * time.Second,
 	}
-
+	go func() {
+		log.Println(http.ListenAndServe(":6060", nil))
+	}()
 	return listenAndServe(server, o)
 }
 
