@@ -33,7 +33,7 @@ RUN go get github.com/tools/godep
 
 WORKDIR $GOPATH/src/imaginary
 ADD . ./
-#ADD ./dist/imaginary $GOPATH/bin/
+ADD ./dist/imaginary $GOPATH/bin/
 #RUN godep restore
 RUN go install
 
