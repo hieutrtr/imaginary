@@ -42,3 +42,4 @@ ENTRYPOINT ["/go/bin/imaginary"]
 
 # Expose the server TCP port
 EXPOSE 9000
+EXPOSE 6060
