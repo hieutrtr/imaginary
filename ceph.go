@@ -166,7 +166,9 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 		// buf := bytes.NewBuffer(make([]byte, 0, leng+1))
 		// io.Copy(buf, bytes.NewReader(data[:leng]))
 		// return buf.Bytes(), nil
-		return data[:leng], nil
+		buf := make([]byte, leng)
+		copy(buf, data)
+		return buf, nil
 	}
 }
 
