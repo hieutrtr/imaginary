@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/ceph/go-ceph/rados"
@@ -125,6 +124,12 @@ func (c *Ceph) SetAttr(obj *CephObject, buf []byte) error {
 	}
 }
 
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return make([]byte, *aMaxAllowedSize)
+	},
+}
+
 // GetAttr fetch object attribute DATA from ceph
 func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	if !c.OnContext(obj.Pool) {
@@ -135,7 +140,9 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	}
 	errSignal := make(chan error)
 	lengSignal := make(chan int)
-	data := make([]byte, *aMaxAllowedSize)
+	// data := make([]byte, *aMaxAllowedSize)
+	data := bufPool.Get().([]byte)
+	defer bufPool.Put(data)
 	go func() {
 		if obj.Attr == "" {
 			obj.Attr = DATA
@@ -156,9 +163,10 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	case err := <-errSignal:
 		return nil, err
 	case leng := <-lengSignal:
-		buf := bytes.NewBuffer(make([]byte, 0, leng+1))
-		io.Copy(buf, bytes.NewReader(data[:leng]))
-		return buf.Bytes(), nil
+		// buf := bytes.NewBuffer(make([]byte, 0, leng+1))
+		// io.Copy(buf, bytes.NewReader(data[:leng]))
+		// return buf.Bytes(), nil
+		return data[:leng], nil
 	}
 }
 
