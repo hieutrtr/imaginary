@@ -130,6 +130,7 @@ var bufPool = sync.Pool{
 	},
 }
 
+
 // GetAttr fetch object attribute DATA from ceph
 func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 	if !c.OnContext(obj.Pool) {
@@ -138,38 +139,21 @@ func (c *Ceph) GetAttr(obj *CephObject) ([]byte, error) {
 			return nil, err
 		}
 	}
-	errSignal := make(chan error)
-	lengSignal := make(chan int)
-	// data := make([]byte, *aMaxAllowedSize)
+	
 	data := bufPool.Get().([]byte)
 	defer bufPool.Put(data)
-	go func() {
-		if obj.Attr == "" {
-			obj.Attr = DATA
-		}
-		leng, err := c.Context[obj.Pool].GetXattr(obj.OID, obj.Attr, data)
-		if err != nil {
-			errSignal <- NewError(err.Error(), NotFound)
-		}
-		if data == nil {
-			errSignal <- NewError("No data", NotFound)
-		}
-		lengSignal <- leng
-	}()
-
-	select {
-	case <-time.After(time.Second * CTX_TIMEOUT):
-		return nil, NewError("Ceph Connection Timeout", 1)
-	case err := <-errSignal:
-		return nil, err
-	case leng := <-lengSignal:
-		// buf := bytes.NewBuffer(make([]byte, 0, leng+1))
-		// io.Copy(buf, bytes.NewReader(data[:leng]))
-		// return buf.Bytes(), nil
-		buf := make([]byte, leng)
-		copy(buf, data)
-		return buf, nil
+	
+	if obj.Attr == "" {
+		obj.Attr = DATA
 	}
+	length, err := c.Context[obj.Pool].GetXattr(obj.OID, obj.Attr, data)
+	if err != nil {
+	    return nil, err
+	}
+		
+	buf := make([]byte, length)
+	copy(buf, data)
+	return buf, nil
 }
 
 // DestroyContext when finish ceph jobs
